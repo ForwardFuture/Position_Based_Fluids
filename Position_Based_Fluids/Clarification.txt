@@ -1,0 +1,30 @@
+UpdatePosition
+
+Step 1:
+	Apply External Forces -- External Forces come from gravity & the walls surrounding fluids
+	Note: We assume that acceleration of gravity is 10m/s^2 and
+		once the particle hit a wall the component of its velocity which perpendicular to the wall is reversed in direction.
+		We can try to apply damping here, but temporarily it's not necessary.
+
+	Get Predict Position
+
+Step 2:
+	Find Neighboring particles -- Use KD_Tree (Time complexity--??)
+
+Step 3:
+	NOTE: Before perform the following operations, you must figure out the theories behind them.
+	SMOOTHING_KERNEL: Poly6 Kernel for density estimation & Spiky Kernel for gradient calculation
+
+	Within the MaxInterations, perform following operations:
+	Operation 1:
+		calculate lambda_i -- Use queue 'neighboring' obtained from 'FindNeiboring()'
+	Operation 2:
+		calculate delta_p_i -- Use lambda_i and restRho, how to calculate restRho???
+		Perform collision detection and response -- how to response to collision??
+	Operation 3:
+		Update positions of each particles(Newton Steps??) -- according to the delta_p_i we just calculate
+
+Step 4:
+	Update velocity -- according to the position of the particle in the adjacent frames
+	Apply vorticity confinement & XSPH viscosity -- why we should apply this??
+	Update position
