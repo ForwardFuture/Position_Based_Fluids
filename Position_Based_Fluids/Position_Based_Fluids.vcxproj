@@ -28,8 +28,6 @@
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="particles.h" />
     <ClCompile Include="SSF.cpp" />
-    <ClCompile Include="stb_image.cpp" />
-    <ClCompile Include="stb_image_write.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
@@ -38,8 +36,6 @@
     <ClInclude Include="PBF.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="SSF.h" />
-    <ClInclude Include="stb_image.h" />
-    <ClInclude Include="stb_image_write.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DepthTexture.fs" />

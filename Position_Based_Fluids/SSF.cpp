@@ -148,7 +148,7 @@ static void Rendering(GLFWwindow* window, Shader NowshaderProgram) {
 void ScreenSpaceFluids(GLFWwindow* window, Camera camera, unsigned int VAO) {
 
 	Shader DepthTextureShader("DepthTexture.vs", "DepthTexture.fs");
-	Shader ThicknessTextureShader("ThicknessTexture.vs", "ThicknessTexture.fs");
+	//Shader ThicknessTextureShader("ThicknessTexture.vs", "ThicknessTexture.fs");
 	Shader shaderProgram("shader.vs", "shader.fs");
 
 	glGenFramebuffers(1, &FBO);

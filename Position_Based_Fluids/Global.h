@@ -18,9 +18,6 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
-#include "stb_image.h"
-#include "stb_image_write.h"
-
 const float Pi = acos(-1);
 const float eps = 1e-6;
 const int INT_INF = 1e9;
