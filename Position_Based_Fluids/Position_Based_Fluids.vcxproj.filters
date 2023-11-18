@@ -82,6 +82,18 @@
     <None Include="shader.fs">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="DepthTexture.fs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="DepthTexture.vs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="ThicknessTexture.vs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="ThicknessTexture.fs">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Clarification.txt">

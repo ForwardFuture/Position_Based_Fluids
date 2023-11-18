@@ -42,8 +42,12 @@
     <ClInclude Include="stb_image_write.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="DepthTexture.fs" />
+    <None Include="DepthTexture.vs" />
     <None Include="shader.fs" />
     <None Include="shader.vs" />
+    <None Include="ThicknessTexture.fs" />
+    <None Include="ThicknessTexture.vs" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Clarification.txt" />

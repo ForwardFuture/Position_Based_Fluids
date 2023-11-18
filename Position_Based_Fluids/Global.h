@@ -28,6 +28,8 @@ const float FLOAT_INF = 1e9;
 
 const float Width = GetSystemMetrics(SM_CXSCREEN);
 const float Height = GetSystemMetrics(SM_CYSCREEN);
+const int int_Width = (int)Width;
+const int int_Height = (int)Height;
 
 const int ROW = 7;
 const int NUM = ROW * ROW * ROW;
