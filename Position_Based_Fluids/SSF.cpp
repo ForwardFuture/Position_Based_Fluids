@@ -13,6 +13,8 @@ static void Draw(Camera camera, unsigned int VAO, Shader NowshaderProgram) {
 	//Bind VAO
 	glBindVertexArray(VAO);
 
+	glEnable(GL_DEPTH_TEST);
+
 	//MVP matrix and rendering
 	for (int i = 0; i < NUM; i++) {
 
@@ -148,14 +150,14 @@ static void Rendering(GLFWwindow* window, Shader NowshaderProgram) {
 void ScreenSpaceFluids(GLFWwindow* window, Camera camera, unsigned int VAO) {
 
 	Shader DepthTextureShader("DepthTexture.vs", "DepthTexture.fs");
-	//Shader ThicknessTextureShader("ThicknessTexture.vs", "ThicknessTexture.fs");
+	Shader ThicknessTextureShader("ThicknessTexture.vs", "ThicknessTexture.fs");
 	Shader shaderProgram("shader.vs", "shader.fs");
 
 	glGenFramebuffers(1, &FBO);
 
 	getDepthTexture(window, camera, VAO, DepthTextureShader);
 
-	//getThicknessTexture(camera, VAO, ThicknessTextureShader);
+	getThicknessTexture(camera, VAO, ThicknessTextureShader);
 
 	Rendering(window, shaderProgram);
 }
