@@ -13,8 +13,6 @@ static void Draw(Camera camera, unsigned int VAO, Shader NowshaderProgram) {
 	//Bind VAO
 	glBindVertexArray(VAO);
 
-	glEnable(GL_DEPTH_TEST);
-
 	//MVP matrix and rendering
 	for (int i = 0; i < NUM; i++) {
 
@@ -41,10 +39,10 @@ static void Draw(Camera camera, unsigned int VAO, Shader NowshaderProgram) {
 	glBindVertexArray(0);
 }
 
-static void getDepthTexture(GLFWwindow* window, Camera camera, unsigned int VAO, Shader NowshaderProgram) {
+static void getDepthTexture(Camera camera, unsigned int VAO, Shader NowshaderProgram) {
 	
+	//Texture
 	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_DEPTH_TEST);
 	glGenTextures(1, &DepthTexture);
 	glBindTexture(GL_TEXTURE_2D, DepthTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, Width, Height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
@@ -52,8 +50,11 @@ static void getDepthTexture(GLFWwindow* window, Camera camera, unsigned int VAO,
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
+	//Framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+	//DepthTest
+	glEnable(GL_DEPTH_TEST);
+	//Framebuffer & Texture
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, DepthTexture, 0);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -65,16 +66,14 @@ static void getDepthTexture(GLFWwindow* window, Camera camera, unsigned int VAO,
 	glClear(GL_DEPTH_BUFFER_BIT);
 	Draw(camera, VAO, NowshaderProgram);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glDisable(GL_DEPTH_TEST);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 static void getThicknessTexture(Camera camera, unsigned int VAO, Shader NowshaderProgram) {
 
+	//Texture
 	glActiveTexture(GL_TEXTURE1);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE);
-	glBlendEquation(GL_FUNC_ADD);
 	glGenTextures(1, &ThicknessTexture);
 	glBindTexture(GL_TEXTURE_2D, ThicknessTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -82,8 +81,16 @@ static void getThicknessTexture(Camera camera, unsigned int VAO, Shader Nowshade
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
+	//Framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+	//Blend
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE);
+	glBlendEquation(GL_FUNC_ADD);
+	//Cullface
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	//Framebuffer & Texture
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ThicknessTexture, 0);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -92,11 +99,12 @@ static void getThicknessTexture(Camera camera, unsigned int VAO, Shader Nowshade
 	}
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT);
 	Draw(camera, VAO, NowshaderProgram);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glDisable(GL_BLEND);
+	glDisable(GL_CULL_FACE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 static void Rendering(GLFWwindow* window, Shader NowshaderProgram) {
@@ -138,7 +146,7 @@ static void Rendering(GLFWwindow* window, Shader NowshaderProgram) {
 	NowshaderProgram.setInt("ThicknessTexture", 1);
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT);
 
 	glDrawElements(GL_TRIANGLES, 3 * 2, GL_UNSIGNED_INT, 0);
 
@@ -155,7 +163,7 @@ void ScreenSpaceFluids(GLFWwindow* window, Camera camera, unsigned int VAO) {
 
 	glGenFramebuffers(1, &FBO);
 
-	getDepthTexture(window, camera, VAO, DepthTextureShader);
+	getDepthTexture(camera, VAO, DepthTextureShader);
 
 	getThicknessTexture(camera, VAO, ThicknessTextureShader);
 
