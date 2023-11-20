@@ -47,14 +47,14 @@ static void getDepthTexture(GLFWwindow* window, Camera camera, unsigned int VAO,
 	glEnable(GL_DEPTH_TEST);
 	glGenTextures(1, &DepthTexture);
 	glBindTexture(GL_TEXTURE_2D, DepthTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, Width, Height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, DepthTexture, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, DepthTexture, 0);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		std::cout << "ERROR: FRAMEBUFFER NOT COMPLETE!" << std::endl;
@@ -62,7 +62,7 @@ static void getDepthTexture(GLFWwindow* window, Camera camera, unsigned int VAO,
 	}
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_DEPTH_BUFFER_BIT);
 	Draw(camera, VAO, NowshaderProgram);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -92,7 +92,7 @@ static void getThicknessTexture(Camera camera, unsigned int VAO, Shader Nowshade
 	}
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	Draw(camera, VAO, NowshaderProgram);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
