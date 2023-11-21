@@ -174,7 +174,44 @@ static void PrepareParameter() {
 
 static void DepthTexture_BilateralFilter() {
 	
+	//Shader
+	Shader BilateralFilter("NoMVP.vs", "BilateralFilter.fs");
+	//Texture
+	glActiveTexture(GL_TEXTURE2);
+	glGenTextures(1, &Depth_BilateralFilter);
+	glBindTexture(GL_TEXTURE_2D, Depth_BilateralFilter);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//Framebuffer
+	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+	//Framebuffer & Texture
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Depth_BilateralFilter, 0);
 
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		std::cout << "ERROR: FRAMEBUFFER NOT COMPLETE!" << std::endl;
+		return;
+	}
+
+	glBindVertexArray(TwoTriangles_VAO);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, DepthTexture);
+	BilateralFilter.UseShaderProgram();
+	BilateralFilter.setFloatArray("GaussianBlur", gaussian_kernel, R);
+	BilateralFilter.setFloatArray("BilateralFilter", bilateral_kernel, 256);
+	BilateralFilter.setInt("DepthTexture", 0);
+	BilateralFilter.setInt("Screen_Width", Width);
+	BilateralFilter.setInt("Screen_Height", Height);
+
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glDrawElements(GL_TRIANGLES, 3 * 2, GL_UNSIGNED_INT, 0);
+
+	glBindVertexArray(0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 static void ThicknessTexture_GaussianBlur() {
@@ -229,10 +266,13 @@ static void Rendering(GLFWwindow* window) {
 	glBindTexture(GL_TEXTURE_2D, DepthTexture);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, ThicknessTexture);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, Depth_BilateralFilter);
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, Thickness_GaussianBlur);
 	shaderProgram.setInt("DepthTexture", 0);
 	shaderProgram.setInt("ThicknessTexture", 1);
+	shaderProgram.setInt("Depth_BilateralFilter", 2);
 	shaderProgram.setInt("Thickness_GaussianBlur", 3);
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);

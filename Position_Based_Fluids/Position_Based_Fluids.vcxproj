@@ -38,6 +38,7 @@
     <ClInclude Include="SSF.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="BilateralFilter.fs" />
     <None Include="DepthTexture.fs" />
     <None Include="GaussianBlur.fs" />
     <None Include="shader.fs" />
