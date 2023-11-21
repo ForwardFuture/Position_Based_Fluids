@@ -39,11 +39,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="DepthTexture.fs" />
-    <None Include="DepthTexture.vs" />
+    <None Include="GaussianBlur.fs" />
     <None Include="shader.fs" />
-    <None Include="shader.vs" />
+    <None Include="NoMVP.vs" />
     <None Include="ThicknessTexture.fs" />
-    <None Include="ThicknessTexture.vs" />
+    <None Include="WithMVP.vs" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Clarification.txt" />

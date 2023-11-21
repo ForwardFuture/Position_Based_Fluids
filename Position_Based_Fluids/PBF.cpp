@@ -5,7 +5,7 @@ static const float deltaTime = 1.0f / 50.0f;
 static float restRho = 0.0f;
 static const int MaxIteration = 5;
 static const int MaxNum = 3;
-static const float Kernel_h = radius * 2.0f * MaxNum;
+static const float Kernel_h = distance * 2.0f * MaxNum;
 static const float damping = 0.65f;
 static const float EPS = 1e-6;
 static const float Tensile_k_for_particle = 0.01f;
@@ -83,13 +83,13 @@ static void Find_Virtual_Particle() {
 		/*
 		check_boundary = -Bound - (predictPos[id].y - Kernel_h);//-Y
 		if (check_boundary > eps) {
-			delta_x = floor(predictPos[id].x / (2.0f * radius)) * 2.0f * radius;
-			delta_z = floor(predictPos[id].z / (2.0f * radius)) * 2.0f * radius;
-			for (float ny = -Bound - radius; ny > -Bound - check_boundary; ny -= 2.0f * radius) {
+			delta_x = floor(predictPos[id].x / (2.0f * distance)) * 2.0f * distance;
+			delta_z = floor(predictPos[id].z / (2.0f * distance)) * 2.0f * distance;
+			for (float ny = -Bound - distance; ny > -Bound - check_boundary; ny -= 2.0f * distance) {
 				for (int i = 0; i < 2 * (MaxNum + 1) + 1; i++) {
 					for (int j = 0; j < 2 * (MaxNum + 1) + 1; j++) {
-						float nx = 2.0f * radius * (i - MaxNum - 1) + delta_x;
-						float nz = 2.0f * radius * (j - MaxNum - 1) + delta_z;
+						float nx = 2.0f * distance * (i - MaxNum - 1) + delta_x;
+						float nz = 2.0f * distance * (j - MaxNum - 1) + delta_z;
 						if (dis(glm::vec3(nx, ny, nz), predictPos[id]) > Kernel_h)continue;
 						additional_neighbors[id].push_back(glm::vec3(nx, ny, nz));
 					}
@@ -99,13 +99,13 @@ static void Find_Virtual_Particle() {
 
 		check_boundary = -Bound - (predictPos[id].x - Kernel_h);//-X
 		if (check_boundary > eps) {
-			delta_y = floor(predictPos[id].y / (2.0f * radius)) * 2.0f * radius;
-			delta_z = floor(predictPos[id].z / (2.0f * radius)) * 2.0f * radius;
-			for (float nx = -Bound - radius; nx > -Bound - check_boundary; nx -= 2.0f * radius) {
+			delta_y = floor(predictPos[id].y / (2.0f * distance)) * 2.0f * distance;
+			delta_z = floor(predictPos[id].z / (2.0f * distance)) * 2.0f * distance;
+			for (float nx = -Bound - distance; nx > -Bound - check_boundary; nx -= 2.0f * distance) {
 				for (int i = 0; i < 2 * (MaxNum + 1) + 1; i++) {
 					for (int j = 0; j < 2 * (MaxNum + 1) + 1; j++) {
-						float ny = 2.0f * radius * (i - MaxNum - 1) + delta_y;
-						float nz = 2.0f * radius * (j - MaxNum - 1) + delta_z;
+						float ny = 2.0f * distance * (i - MaxNum - 1) + delta_y;
+						float nz = 2.0f * distance * (j - MaxNum - 1) + delta_z;
 						if (dis(glm::vec3(nx, ny, nz), predictPos[id]) > Kernel_h)continue;
 						additional_neighbors[id].push_back(glm::vec3(nx, ny, nz));
 					}
@@ -115,13 +115,13 @@ static void Find_Virtual_Particle() {
 
 		check_boundary = predictPos[id].x + Kernel_h - Bound;//X
 		if (check_boundary > eps) {
-			delta_y = floor(predictPos[id].y / (2.0f * radius)) * 2.0f * radius;
-			delta_z = floor(predictPos[id].z / (2.0f * radius)) * 2.0f * radius;
-			for (float nx = Bound + radius; nx < Bound + check_boundary; nx += 2.0f * radius) {
+			delta_y = floor(predictPos[id].y / (2.0f * distance)) * 2.0f * distance;
+			delta_z = floor(predictPos[id].z / (2.0f * distance)) * 2.0f * distance;
+			for (float nx = Bound + distance; nx < Bound + check_boundary; nx += 2.0f * distance) {
 				for (int i = 0; i < 2 * (MaxNum + 1) + 1; i++) {
 					for (int j = 0; j < 2 * (MaxNum + 1) + 1; j++) {
-						float ny = 2.0f * radius * (i - MaxNum - 1) + delta_y;
-						float nz = 2.0f * radius * (j - MaxNum - 1) + delta_z;
+						float ny = 2.0f * distance * (i - MaxNum - 1) + delta_y;
+						float nz = 2.0f * distance * (j - MaxNum - 1) + delta_z;
 						if (dis(glm::vec3(nx, ny, nz), predictPos[id]) > Kernel_h)continue;
 						additional_neighbors[id].push_back(glm::vec3(nx, ny, nz));
 					}
@@ -131,13 +131,13 @@ static void Find_Virtual_Particle() {
 
 		check_boundary = -Bound - (predictPos[id].z - Kernel_h);//-Z
 		if (check_boundary > eps) {
-			delta_x = floor(predictPos[id].x / (2.0f * radius)) * 2.0f * radius;
-			delta_y = floor(predictPos[id].y / (2.0f * radius)) * 2.0f * radius;
-			for (float nz = -Bound - radius; nz > -Bound - check_boundary; nz -= 2.0f * radius) {
+			delta_x = floor(predictPos[id].x / (2.0f * distance)) * 2.0f * distance;
+			delta_y = floor(predictPos[id].y / (2.0f * distance)) * 2.0f * distance;
+			for (float nz = -Bound - distance; nz > -Bound - check_boundary; nz -= 2.0f * distance) {
 				for (int i = 0; i < 2 * (MaxNum + 1) + 1; i++) {
 					for (int j = 0; j < 2 * (MaxNum + 1) + 1; j++) {
-						float nx = 2.0f * radius * (i - MaxNum - 1) + delta_x;
-						float ny = 2.0f * radius * (j - MaxNum - 1) + delta_y;
+						float nx = 2.0f * distance * (i - MaxNum - 1) + delta_x;
+						float ny = 2.0f * distance * (j - MaxNum - 1) + delta_y;
 						if (dis(glm::vec3(nx, ny, nz), predictPos[id]) > Kernel_h)continue;
 						additional_neighbors[id].push_back(glm::vec3(nx, ny, nz));
 					}
@@ -147,13 +147,13 @@ static void Find_Virtual_Particle() {
 
 		check_boundary = predictPos[id].z + Kernel_h - Bound;//Z
 		if (check_boundary > eps) {
-			delta_x = floor(predictPos[id].x / (2.0f * radius)) * 2.0f * radius;
-			delta_y = floor(predictPos[id].y / (2.0f * radius)) * 2.0f * radius;
-			for (float nz = Bound + radius; nz < Bound + check_boundary; nz += 2.0f * radius) {
+			delta_x = floor(predictPos[id].x / (2.0f * distance)) * 2.0f * distance;
+			delta_y = floor(predictPos[id].y / (2.0f * distance)) * 2.0f * distance;
+			for (float nz = Bound + distance; nz < Bound + check_boundary; nz += 2.0f * distance) {
 				for (int i = 0; i < 2 * (MaxNum + 1) + 1; i++) {
 					for (int j = 0; j < 2 * (MaxNum + 1) + 1; j++) {
-						float nx = 2.0f * radius * (i - MaxNum - 1) + delta_x;
-						float ny = 2.0f * radius * (j - MaxNum - 1) + delta_y;
+						float nx = 2.0f * distance * (i - MaxNum - 1) + delta_x;
+						float ny = 2.0f * distance * (j - MaxNum - 1) + delta_y;
 						if (dis(glm::vec3(nx, ny, nz), predictPos[id]) > Kernel_h)continue;
 						additional_neighbors[id].push_back(glm::vec3(nx, ny, nz));
 					}
@@ -164,11 +164,11 @@ static void Find_Virtual_Particle() {
 
 		check_boundary = -Bound - (predictPos[id].y - Kernel_h);//-Y
 		if (check_boundary > eps) {
-			for (float ny = -Bound - radius; ny > -Bound - check_boundary; ny -= 2.0f * radius) {
+			for (float ny = -Bound - distance; ny > -Bound - check_boundary; ny -= 2.0f * distance) {
 				for (int i = 0; i < 2 * MaxNum + 1; i++) {
 					for (int j = 0; j < 2 * MaxNum + 1; j++) {
-						float nx = 2.0f * radius * (i - MaxNum) + predictPos[id].x;
-						float nz = 2.0f * radius * (j - MaxNum) + predictPos[id].z;
+						float nx = 2.0f * distance * (i - MaxNum) + predictPos[id].x;
+						float nz = 2.0f * distance * (j - MaxNum) + predictPos[id].z;
 						if (dis(glm::vec3(nx, ny, nz), predictPos[id]) > Kernel_h)continue;
 						additional_neighbors[id].push_back(glm::vec3(nx, ny, nz));
 					}
@@ -178,11 +178,11 @@ static void Find_Virtual_Particle() {
 
 		check_boundary = -Bound - (predictPos[id].x - Kernel_h);//-X
 		if (check_boundary > eps) {
-			for (float nx = -Bound - radius; nx > -Bound - check_boundary; nx -= 2.0f * radius) {
+			for (float nx = -Bound - distance; nx > -Bound - check_boundary; nx -= 2.0f * distance) {
 				for (int i = 0; i < 2 * MaxNum + 1; i++) {
 					for (int j = 0; j < 2 * MaxNum + 1; j++) {
-						float ny = 2.0f * radius * (i - MaxNum) + predictPos[id].y;
-						float nz = 2.0f * radius * (j - MaxNum) + predictPos[id].z;
+						float ny = 2.0f * distance * (i - MaxNum) + predictPos[id].y;
+						float nz = 2.0f * distance * (j - MaxNum) + predictPos[id].z;
 						if (dis(glm::vec3(nx, ny, nz), predictPos[id]) > Kernel_h)continue;
 						additional_neighbors[id].push_back(glm::vec3(nx, ny, nz));
 					}
@@ -192,11 +192,11 @@ static void Find_Virtual_Particle() {
 
 		check_boundary = predictPos[id].x + Kernel_h - Bound;//X
 		if (check_boundary > eps) {
-			for (float nx = Bound + radius; nx < Bound + check_boundary; nx += 2.0f * radius) {
+			for (float nx = Bound + distance; nx < Bound + check_boundary; nx += 2.0f * distance) {
 				for (int i = 0; i < 2 * MaxNum + 1; i++) {
 					for (int j = 0; j < 2 * MaxNum + 1; j++) {
-						float ny = 2.0f * radius * (i - MaxNum) + predictPos[id].y;
-						float nz = 2.0f * radius * (j - MaxNum) + predictPos[id].z;
+						float ny = 2.0f * distance * (i - MaxNum) + predictPos[id].y;
+						float nz = 2.0f * distance * (j - MaxNum) + predictPos[id].z;
 						if (dis(glm::vec3(nx, ny, nz), predictPos[id]) > Kernel_h)continue;
 						additional_neighbors[id].push_back(glm::vec3(nx, ny, nz));
 					}
@@ -206,11 +206,11 @@ static void Find_Virtual_Particle() {
 
 		check_boundary = -Bound - (predictPos[id].z - Kernel_h);//-Z
 		if (check_boundary > eps) {
-			for (float nz = -Bound - radius; nz > -Bound - check_boundary; nz -= 2.0f * radius) {
+			for (float nz = -Bound - distance; nz > -Bound - check_boundary; nz -= 2.0f * distance) {
 				for (int i = 0; i < 2 * MaxNum + 1; i++) {
 					for (int j = 0; j < 2 * MaxNum + 1; j++) {
-						float nx = 2.0f * radius * (i - MaxNum) + predictPos[id].x;
-						float ny = 2.0f * radius * (j - MaxNum) + predictPos[id].y;
+						float nx = 2.0f * distance * (i - MaxNum) + predictPos[id].x;
+						float ny = 2.0f * distance * (j - MaxNum) + predictPos[id].y;
 						if (dis(glm::vec3(nx, ny, nz), predictPos[id]) > Kernel_h)continue;
 						additional_neighbors[id].push_back(glm::vec3(nx, ny, nz));
 					}
@@ -220,11 +220,11 @@ static void Find_Virtual_Particle() {
 
 		check_boundary = predictPos[id].z + Kernel_h - Bound;//Z
 		if (check_boundary > eps) {
-			for (float nz = Bound + radius; nz < Bound + check_boundary; nz += 2.0f * radius) {
+			for (float nz = Bound + distance; nz < Bound + check_boundary; nz += 2.0f * distance) {
 				for (int i = 0; i < 2 * MaxNum + 1; i++) {
 					for (int j = 0; j < 2 * MaxNum + 1; j++) {
-						float nx = 2.0f * radius * (i - MaxNum) + predictPos[id].x;
-						float ny = 2.0f * radius * (j - MaxNum) + predictPos[id].y;
+						float nx = 2.0f * distance * (i - MaxNum) + predictPos[id].x;
+						float ny = 2.0f * distance * (j - MaxNum) + predictPos[id].y;
 						if (dis(glm::vec3(nx, ny, nz), predictPos[id]) > Kernel_h)continue;
 						additional_neighbors[id].push_back(glm::vec3(nx, ny, nz));
 					}
@@ -241,9 +241,9 @@ void PositionBasedFluids() {
 	for (int i = 0; i < 2 * MaxNum + 1; i++) {
 		for (int j = 0; j < 2 * MaxNum + 1; j++) {
 			for (int k = 0; k < 2 * MaxNum + 1; k++) {
-				float nx = 2.0f * radius * (i - MaxNum);
-				float ny = 2.0f * radius * (j - MaxNum);
-				float nz = 2.0f * radius * (k - MaxNum);
+				float nx = 2.0f * distance * (i - MaxNum);
+				float ny = 2.0f * distance * (j - MaxNum);
+				float nz = 2.0f * distance * (k - MaxNum);
 				if (dis(glm::vec3(0.0f), glm::vec3(nx, ny, nz)) < Kernel_h) {
 					restRho += Poly6_density(glm::vec3(0.0f) - glm::vec3(nx, ny, nz), Kernel_h);
 				}
@@ -336,7 +336,7 @@ void PositionBasedFluids() {
 	for (int i = 0; i < NUM; i++)particles[i].Pos = tmpPos[i];
 	for (int i = 0; i < NUM; i++) {
 		std::vector<int>().swap(neighbors[i]);
-		//¡ù¡ù¡ùBe cautious to the set of the radius of kernel function
+		//¡ù¡ù¡ùBe cautious to the set of the distance of kernel function
 		KDTree::FindNeighbors(predictPos[i], Kernel_h);
 		while (!KDTree::neighboring.empty()) {
 			neighbors[i].push_back(KDTree::neighboring.front());
@@ -383,7 +383,7 @@ void PositionBasedFluids() {
 					(predictPos[i].y - predictPos[j].y) * (delta_p[i].y - delta_p[j].y) +
 					(predictPos[i].z - predictPos[j].z) * (delta_p[i].z - delta_p[j].z));
 				float C = (float)(pow(predictPos[i].x - predictPos[j].x, 2) + pow(predictPos[i].y - predictPos[j].y, 2) + pow(predictPos[i].z - predictPos[j].z, 2));
-				C -= (2.0f * radius) * (2.0f * radius);
+				C -= (2.0f * distance) * (2.0f * distance);
 
 				float DELTA = B * B - 4.0f * A * C;
 				if (DELTA < eps)continue;

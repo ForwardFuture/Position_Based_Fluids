@@ -81,10 +81,10 @@ int main() {
 	for (int i = 0; i < NUM; i++) {
 		particles[i] = Particles(glm::vec3(nowx, nowy + Yoffset, nowz), glm::vec3(0.0f), i);
 
-		nowy += (fabs(nowz - halflen) < eps && fabs(nowx - halflen) < eps) ? (2.0f * radius) : 0;
-		nowx += (fabs(nowz - halflen) < eps) ? (2.0f * radius) : 0;
+		nowy += (fabs(nowz - halflen) < eps && fabs(nowx - halflen) < eps) ? (2.0f * distance) : 0;
+		nowx += (fabs(nowz - halflen) < eps) ? (2.0f * distance) : 0;
 		nowx = (nowx - halflen > eps) ? -halflen : nowx;
-		nowz += (2.0f * radius);
+		nowz += (2.0f * distance);
 		nowz = (nowz - halflen > eps) ? -halflen : nowz;
 	}
 

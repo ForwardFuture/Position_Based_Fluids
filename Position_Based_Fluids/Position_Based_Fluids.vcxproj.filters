@@ -64,7 +64,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader.vs">
+    <None Include="NoMVP.vs">
       <Filter>资源文件</Filter>
     </None>
     <None Include="shader.fs">
@@ -73,13 +73,13 @@
     <None Include="DepthTexture.fs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="DepthTexture.vs">
-      <Filter>资源文件</Filter>
-    </None>
-    <None Include="ThicknessTexture.vs">
+    <None Include="WithMVP.vs">
       <Filter>资源文件</Filter>
     </None>
     <None Include="ThicknessTexture.fs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="GaussianBlur.fs">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>

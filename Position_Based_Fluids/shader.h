@@ -11,5 +11,7 @@ public:
 	void UseShaderProgram();
 
 	void setInt(const std::string name, int value);
+	void setFloat(const std::string names, float value);
+	void setFloatArray(const std::string name, float* arr, int length);
 	void setMatrix(const std::string name, glm::mat4 matrix);
 };
