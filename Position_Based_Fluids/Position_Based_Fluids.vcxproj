@@ -48,9 +48,6 @@
     <None Include="ThicknessTexture.fs" />
     <None Include="WithMVP.vs" />
   </ItemGroup>
-  <ItemGroup>
-    <Text Include="Clarification.txt" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
