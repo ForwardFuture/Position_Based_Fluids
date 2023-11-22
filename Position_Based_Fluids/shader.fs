@@ -14,7 +14,7 @@ void main() {
 	//FragColor = vec4(vec3(texture(DepthTexture, TexCoord).r), 1.0);
 	//FragColor = texture(ThicknessTexture, TexCoord);
 	//FragColor = texture(NormalTexture, TexCoord);
-	//FragColor = texture(Depth_BilateralFilter, TexCoord);
+	FragColor = texture(Depth_BilateralFilter, TexCoord);
 	//FragColor = texture(Thickness_GaussianBlur, TexCoord);
-	FragColor = texture(Normal_GaussianBlur, TexCoord);
+	//FragColor = texture(Normal_GaussianBlur, TexCoord);
 }

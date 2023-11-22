@@ -12,7 +12,7 @@ static unsigned int Normal_GaussianBlur;
 static glm::mat4 MVP, model, view, projection;
 
 //R must be odd. If R is updated to an even number, relevant code segment needs to be changed.
-static const int R = 5;
+static const int R = 51;
 static float gaussian_sigma = 1000.0f;
 static float bilateral_sigma = 1000.0f;
 static float W = 0.0f;
