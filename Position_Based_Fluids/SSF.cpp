@@ -11,12 +11,16 @@ static unsigned int NormalTexture;
 static glm::mat4 MVP, model, view, projection;
 
 //R must be odd. If R is updated to an even number, relevant code segment needs to be changed.
-static const int R = 21;
-static float gaussian_sigma = 1000.0f;
+static const int R1 = 5;
+static const int R2 = 31;
+static float gaussian_sigma_Depth = 1000.0f;
+static float gaussian_sigma_Thickness = 1000.0f;
 static float bilateral_sigma = 1000.0f;
-static float W = 0.0f;
+static float W_Depth = 0.0f;
+static float W_Thickness = 0.0f;
 
-static float gaussian_kernel[R];
+static float gaussian_kernel_Depth[R1];
+static float gaussian_kernel_Thickness[R2];
 static float bilateral_kernel[256];
 
 static float TwoTriangles[] = {
@@ -33,14 +37,25 @@ static unsigned int TwoTriangles_VAO, TwoTriangles_VBO, TwoTriangles_EBO;
 
 static void PrepareParameter() {
 
-	for (int i = 0; i <= (R - 1) / 2; i++) {
-		gaussian_kernel[i] = exp(-1.0 * i * i / (2.0 * gaussian_sigma * gaussian_sigma));
+	for (int i = 0; i <= (R1 - 1) / 2; i++) {
+		gaussian_kernel_Depth[i] = exp(-1.0 * i * i / (2.0 * gaussian_sigma_Depth * gaussian_sigma_Depth));
 	}
 
-	W = 0.0f;
-	for (int i = 0; i < R; i++) {
-		for (int j = 0; j < R; j++) {
-			W += gaussian_kernel[abs(i - (R - 1) / 2)] * gaussian_kernel[abs(j - (R - 1) / 2)];
+	W_Depth = 0.0f;
+	for (int i = 0; i < R1; i++) {
+		for (int j = 0; j < R1; j++) {
+			W_Depth += gaussian_kernel_Depth[abs(i - (R1 - 1) / 2)] * gaussian_kernel_Depth[abs(j - (R1 - 1) / 2)];
+		}
+	}
+
+	for (int i = 0; i <= (R2 - 1) / 2; i++) {
+		gaussian_kernel_Thickness[i] = exp(-1.0 * i * i / (2.0 * gaussian_sigma_Thickness * gaussian_sigma_Thickness));
+	}
+
+	W_Thickness = 0.0f;
+	for (int i = 0; i < R2; i++) {
+		for (int j = 0; j < R2; j++) {
+			W_Thickness += gaussian_kernel_Thickness[abs(i - (R2 - 1) / 2)] * gaussian_kernel_Thickness[abs(j - (R2 - 1) / 2)];
 		}
 	}
 
@@ -201,7 +216,8 @@ static void DepthTexture_BilateralFilter() {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, DepthTexture);
 	BilateralFilter.UseShaderProgram();
-	BilateralFilter.setFloatArray("GaussianBlur", gaussian_kernel, R);
+	BilateralFilter.setFloatArray("GaussianBlur", gaussian_kernel_Depth, R1);
+	BilateralFilter.setInt("R1", R1);
 	BilateralFilter.setFloatArray("BilateralFilter", bilateral_kernel, 256);
 	BilateralFilter.setInt("DepthTexture", 0);
 	BilateralFilter.setInt("Screen_Width", Width);
@@ -243,8 +259,9 @@ static void ThicknessTexture_GaussianBlur() {
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, ThicknessTexture);
 	GaussianBlur.UseShaderProgram();
-	GaussianBlur.setFloatArray("GaussianBlur", gaussian_kernel, R);
-	GaussianBlur.setFloat("W", W);
+	GaussianBlur.setFloatArray("GaussianBlur", gaussian_kernel_Thickness, R2);
+	GaussianBlur.setInt("R2", R2);
+	GaussianBlur.setFloat("W", W_Thickness);
 	GaussianBlur.setInt("ThicknessTexture", 1);
 	GaussianBlur.setInt("Screen_Width", Width);
 	GaussianBlur.setInt("Screen_Height", Height);
