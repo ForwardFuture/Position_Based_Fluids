@@ -41,6 +41,8 @@
     <None Include="BilateralFilter.fs" />
     <None Include="DepthTexture.fs" />
     <None Include="GaussianBlur.fs" />
+    <None Include="NormalTexture.fs" />
+    <None Include="NormalTexture_GaussianBlur.fs" />
     <None Include="shader.fs" />
     <None Include="NoMVP.vs" />
     <None Include="ThicknessTexture.fs" />

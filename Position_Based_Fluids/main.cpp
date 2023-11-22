@@ -58,12 +58,12 @@ int main() {
 
 	//Primitives & Indices & Vertices
 	float primitives[] = {
-		0.0f, radius, 0.0f,
-		0.0f, 0.0f, radius,
-		radius, 0.0f, 0.0f,
-		0.0f, 0.0f, -radius,
-		-radius, 0.0f, 0.0f,
-		0.0f, -radius, 0.0f
+		0.0f, radius, 0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, radius, 0.0f, 0.0f, 1.0f,
+		radius, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, -radius, 0.0f, 0.0f, -1.0f,
+		-radius, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+		0.0f, -radius, 0.0f, 0.0f, -1.0f, 0.0f
 	};
 
 	unsigned int indices[] = {
@@ -98,8 +98,10 @@ int main() {
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(primitives), primitives, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
@@ -109,9 +111,6 @@ int main() {
 	//RenderingLoop
 	while (!glfwWindowShouldClose(window)) {
 		WindowCheck(window);
-
-		glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//Position_Based_Fluids Simulation
 		PositionBasedFluids();

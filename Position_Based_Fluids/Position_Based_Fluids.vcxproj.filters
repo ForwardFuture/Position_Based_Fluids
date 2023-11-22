@@ -85,6 +85,12 @@
     <None Include="BilateralFilter.fs">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="NormalTexture.fs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="NormalTexture_GaussianBlur.fs">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Clarification.txt">
