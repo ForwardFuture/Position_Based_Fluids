@@ -35,5 +35,5 @@ void main() {
 	float len = sqrt(z.x * z.x + z.y * z.y + z.z * z.z);
 	z = z / len;
 
-	FragColor = vec4(z, 1.0);
+	FragColor = vec4((z.x + 1.0) / 2.0, (z.y + 1.0) / 2.0, (z.z + 1.0) / 2.0, 1.0);
 }
