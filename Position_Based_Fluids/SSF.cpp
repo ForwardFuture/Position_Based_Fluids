@@ -3,16 +3,15 @@
 static unsigned int FBO;
 static unsigned int DepthTexture;
 static unsigned int ThicknessTexture;
-static unsigned int NormalTexture;
 
 static unsigned int Depth_BilateralFilter;
 static unsigned int Thickness_GaussianBlur;
-static unsigned int Normal_GaussianBlur;
+static unsigned int NormalTexture;
 
 static glm::mat4 MVP, model, view, projection;
 
 //R must be odd. If R is updated to an even number, relevant code segment needs to be changed.
-static const int R = 51;
+static const int R = 21;
 static float gaussian_sigma = 1000.0f;
 static float bilateral_sigma = 1000.0f;
 static float W = 0.0f;
@@ -175,46 +174,12 @@ static void getThicknessTexture(Camera camera, unsigned int VAO) {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-static void getNormalTexture(Camera camera, unsigned int VAO) {
-
-	//Shader
-	Shader NormalTextureShader("WithMVP.vs", "NormalTexture.fs");
-	//Texture
-	glActiveTexture(GL_TEXTURE2);
-	glGenTextures(1, &NormalTexture);
-	glBindTexture(GL_TEXTURE_2D, NormalTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//Framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-	//DepthTest
-	glEnable(GL_DEPTH_TEST);
-	//Framebuffer & Texture
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, NormalTexture, 0);
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		std::cout << "ERROR: FRAMEBUFFER NOT COMPLETE!" << std::endl;
-		return;
-	}
-
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	Draw(camera, VAO, NormalTextureShader);
-
-	glDisable(GL_DEPTH_TEST);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
 static void DepthTexture_BilateralFilter() {
 	
 	//Shader
 	Shader BilateralFilter("NoMVP.vs", "BilateralFilter.fs");
 	//Texture
-	glActiveTexture(GL_TEXTURE3);
+	glActiveTexture(GL_TEXTURE2);
 	glGenTextures(1, &Depth_BilateralFilter);
 	glBindTexture(GL_TEXTURE_2D, Depth_BilateralFilter);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -242,7 +207,7 @@ static void DepthTexture_BilateralFilter() {
 	BilateralFilter.setInt("Screen_Width", Width);
 	BilateralFilter.setInt("Screen_Height", Height);
 
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glDrawElements(GL_TRIANGLES, 3 * 2, GL_UNSIGNED_INT, 0);
@@ -256,7 +221,7 @@ static void ThicknessTexture_GaussianBlur() {
 	//Shader
 	Shader GaussianBlur("NoMVP.vs", "GaussianBlur.fs");
 	//Texture
-	glActiveTexture(GL_TEXTURE4);
+	glActiveTexture(GL_TEXTURE3);
 	glGenTextures(1, &Thickness_GaussianBlur);
 	glBindTexture(GL_TEXTURE_2D, Thickness_GaussianBlur);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -293,13 +258,14 @@ static void ThicknessTexture_GaussianBlur() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-static void NormalTexture_GaussianBlur() {
+static void getNormalTexture() {
+
 	//Shader
-	Shader NormalTexture_GaussianBlur("NoMVP.vs", "NormalTexture_GaussianBlur.fs");
+	Shader NormalTextureShader("NoMVP.vs", "NormalTexture.fs");
 	//Texture
-	glActiveTexture(GL_TEXTURE5);
-	glGenTextures(1, &Normal_GaussianBlur);
-	glBindTexture(GL_TEXTURE_2D, Normal_GaussianBlur);
+	glActiveTexture(GL_TEXTURE4);
+	glGenTextures(1, &NormalTexture);
+	glBindTexture(GL_TEXTURE_2D, NormalTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -308,7 +274,7 @@ static void NormalTexture_GaussianBlur() {
 	//Framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 	//Framebuffer & Texture
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Normal_GaussianBlur, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, NormalTexture, 0);
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		std::cout << "ERROR: FRAMEBUFFER NOT COMPLETE!" << std::endl;
@@ -317,13 +283,11 @@ static void NormalTexture_GaussianBlur() {
 
 	glBindVertexArray(TwoTriangles_VAO);
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, NormalTexture);
-	NormalTexture_GaussianBlur.UseShaderProgram();
-	NormalTexture_GaussianBlur.setFloatArray("GaussianBlur", gaussian_kernel, R);
-	NormalTexture_GaussianBlur.setFloat("W", W);
-	NormalTexture_GaussianBlur.setInt("NormalTexture", 2);
-	NormalTexture_GaussianBlur.setInt("Screen_Width", Width);
-	NormalTexture_GaussianBlur.setInt("Screen_Height", Height);
+	glBindTexture(GL_TEXTURE_2D, Depth_BilateralFilter);
+	NormalTextureShader.UseShaderProgram();
+	NormalTextureShader.setInt("Depth_BilateralFilter", 2);
+	NormalTextureShader.setInt("Screen_Width", Width);
+	NormalTextureShader.setInt("Screen_Height", Height);
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -345,21 +309,18 @@ static void Rendering(GLFWwindow* window) {
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, ThicknessTexture);
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, NormalTexture);
-	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, Depth_BilateralFilter);
-	glActiveTexture(GL_TEXTURE4);
+	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, Thickness_GaussianBlur);
-	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_2D, Normal_GaussianBlur);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, NormalTexture);
 	shaderProgram.setInt("DepthTexture", 0);
 	shaderProgram.setInt("ThicknessTexture", 1);
-	shaderProgram.setInt("NormalTexture", 2);
-	shaderProgram.setInt("Depth_BilateralFilter", 3);
-	shaderProgram.setInt("Thickness_GaussianBlur", 4);
-	shaderProgram.setInt("Normal_GaussianBlur", 5);
+	shaderProgram.setInt("Depth_BilateralFilter", 2);
+	shaderProgram.setInt("Thickness_GaussianBlur", 3);
+	shaderProgram.setInt("NormalTexture", 4);
 
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glDrawElements(GL_TRIANGLES, 3 * 2, GL_UNSIGNED_INT, 0);
@@ -376,11 +337,10 @@ void ScreenSpaceFluids(GLFWwindow* window, Camera camera, unsigned int VAO) {
 	glGenFramebuffers(1, &FBO);
 	getDepthTexture(camera, VAO);
 	getThicknessTexture(camera, VAO);
-	getNormalTexture(camera, VAO);
 
 	DepthTexture_BilateralFilter();
 	ThicknessTexture_GaussianBlur();
-	NormalTexture_GaussianBlur();
+	getNormalTexture();
 
 	Rendering(window);
 }
