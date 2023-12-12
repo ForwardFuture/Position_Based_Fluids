@@ -13,10 +13,9 @@ uniform sampler2D ThicknessTexture;
 void main() {
 
 	float tot = 0;
-	int bound = (R2 - 1) / 2;
 
-	for(int i = -bound; i <= bound; i++) {
-		for(int j = -bound; j <= bound; j++) {
+	for(int i = -R2; i <= R2; i++) {
+		for(int j = -R2; j <= R2; j++) {
 			tot += texture(ThicknessTexture, vec2(TexCoord.s + 1.0 * i / Screen_Width, TexCoord.t + 1.0 * j / Screen_Height)).r 
 			* GaussianBlur[abs(i)] * GaussianBlur[abs(j)];
 		}

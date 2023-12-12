@@ -5,4 +5,6 @@
 #include "shader.h"
 #include "particles.h"
 
+void SSF_initial();
+
 void ScreenSpaceFluids(GLFWwindow* window, Camera camera, unsigned int VAO);

@@ -24,20 +24,39 @@ static glm::vec3 tmpVel[NUM];
 static glm::vec3 w[NUM];
 static glm::vec3 eta[NUM];
 
-static float dis(glm::vec3 a, glm::vec3 b) {
+float dis(glm::vec3 a, glm::vec3 b) {
 	return glm::length(a - b);
 }
 
-static float Poly6_density(glm::vec3 dir, float h) {
+float Poly6_density(glm::vec3 dir, float h) {
 	float len = glm::length(dir);
 	if (len > h)return 0.0;
 	return 315 / (64 * Pi * pow(h, 9)) * pow((h * h - len * len), 3);
 }
 
-static glm::vec3 Spiky_gradient(glm::vec3 dir, float h) {
+glm::vec3 Spiky_gradient(glm::vec3 dir, float h) {
 	float len = glm::length(dir);
 	if (len > h || fabs(len) < eps)return glm::vec3(0.0f);
 	return float(-45.0f / (Pi * pow(h, 6)) * pow((h - len), 2)) * dir / len;
+}
+
+void PBF_initial() {
+
+	//Compute restRho
+	restRho = 0.0f;
+	for (int i = 0; i < 2 * MaxNum + 1; i++) {
+		for (int j = 0; j < 2 * MaxNum + 1; j++) {
+			for (int k = 0; k < 2 * MaxNum + 1; k++) {
+				float nx = 2.0f * distance * (i - MaxNum);
+				float ny = 2.0f * distance * (j - MaxNum);
+				float nz = 2.0f * distance * (k - MaxNum);
+				if (dis(glm::vec3(0.0f), glm::vec3(nx, ny, nz)) < Kernel_h) {
+					restRho += Poly6_density(glm::vec3(0.0f) - glm::vec3(nx, ny, nz), Kernel_h);
+				}
+			}
+		}
+	}
+	//restRho = 33000.0f;
 }
 
 static float Constraint(int id, float h) {
@@ -235,22 +254,6 @@ static void Find_Virtual_Particle() {
 }
 
 void PositionBasedFluids() {
-
-	//Compute restRho
-	restRho = 0.0f;
-	for (int i = 0; i < 2 * MaxNum + 1; i++) {
-		for (int j = 0; j < 2 * MaxNum + 1; j++) {
-			for (int k = 0; k < 2 * MaxNum + 1; k++) {
-				float nx = 2.0f * distance * (i - MaxNum);
-				float ny = 2.0f * distance * (j - MaxNum);
-				float nz = 2.0f * distance * (k - MaxNum);
-				if (dis(glm::vec3(0.0f), glm::vec3(nx, ny, nz)) < Kernel_h) {
-					restRho += Poly6_density(glm::vec3(0.0f) - glm::vec3(nx, ny, nz), Kernel_h);
-				}
-			}
-		}
-	}
-	//restRho = 33000.0f;
 
 	//Step 0: Store Position
 	for (int i = 0; i < NUM; i++) {

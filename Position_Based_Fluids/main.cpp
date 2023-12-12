@@ -108,6 +108,10 @@ int main() {
 
 	glBindVertexArray(0);
 
+	PBF_initial();
+
+	SSF_initial();
+
 	//RenderingLoop
 	while (!glfwWindowShouldClose(window)) {
 		WindowCheck(window);

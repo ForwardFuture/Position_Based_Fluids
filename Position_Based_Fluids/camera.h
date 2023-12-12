@@ -14,9 +14,9 @@ private:
 	float pitch, yaw;
 	float fov = 45.0f;
 
-	float currentFrame = 0.0, lastFrame = 0.0;
+	float currentFrame = 0.0f, lastFrame = 0.0f;
 	bool firstmouse = true;
-	float lastX = Width / 2, lastY = Height / 2;
+	float lastX = Width / 2.0f, lastY = Height / 2.0f;
 
 public:
 	float Speed = SPEED;

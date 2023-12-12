@@ -1,6 +1,7 @@
 #include "SSF.h"
 
 static unsigned int FBO;
+
 static unsigned int DepthTexture;
 static unsigned int ThicknessTexture;
 
@@ -10,17 +11,15 @@ static unsigned int NormalTexture;
 
 static glm::mat4 MVP, model, view, projection;
 
-//R must be odd. If R is updated to an even number, relevant code segment needs to be changed.
-static const int R1 = 5;
-static const int R2 = 31;
+static const int R1 = 3;
+static const int R2 = 30;
 static float gaussian_sigma_Depth = 1000.0f;
 static float gaussian_sigma_Thickness = 1000.0f;
 static float bilateral_sigma = 1000.0f;
-static float W_Depth = 0.0f;
 static float W_Thickness = 0.0f;
 
-static float gaussian_kernel_Depth[R1];
-static float gaussian_kernel_Thickness[R2];
+static float gaussian_kernel_Depth[R1 + 1];
+static float gaussian_kernel_Thickness[R2 + 1];
 static float bilateral_kernel[256];
 
 static float TwoTriangles[] = {
@@ -35,34 +34,44 @@ static unsigned int TwoTrianglesIndices[] = {
 };
 static unsigned int TwoTriangles_VAO, TwoTriangles_VBO, TwoTriangles_EBO;
 
-static void PrepareParameter() {
-
-	for (int i = 0; i <= (R1 - 1) / 2; i++) {
-		gaussian_kernel_Depth[i] = exp(-1.0 * i * i / (2.0 * gaussian_sigma_Depth * gaussian_sigma_Depth));
+static void initial_kernel() {
+	// Depth Blur_Gaussian Kernel
+	for (int i = 0; i <= R1; i++) {
+		gaussian_kernel_Depth[abs(i)] = exp(-1.0 * i * i / (2.0 * gaussian_sigma_Depth * gaussian_sigma_Depth));
 	}
 
-	W_Depth = 0.0f;
-	for (int i = 0; i < R1; i++) {
-		for (int j = 0; j < R1; j++) {
-			W_Depth += gaussian_kernel_Depth[abs(i - (R1 - 1) / 2)] * gaussian_kernel_Depth[abs(j - (R1 - 1) / 2)];
-		}
-	}
-
-	for (int i = 0; i <= (R2 - 1) / 2; i++) {
-		gaussian_kernel_Thickness[i] = exp(-1.0 * i * i / (2.0 * gaussian_sigma_Thickness * gaussian_sigma_Thickness));
-	}
-
-	W_Thickness = 0.0f;
-	for (int i = 0; i < R2; i++) {
-		for (int j = 0; j < R2; j++) {
-			W_Thickness += gaussian_kernel_Thickness[abs(i - (R2 - 1) / 2)] * gaussian_kernel_Thickness[abs(j - (R2 - 1) / 2)];
-		}
-	}
-
+	// Depth Blur_Bilateral Kernel
 	for (int i = 0; i < 256; i++) {
 		bilateral_kernel[i] = exp(-1.0 * i * i / (2.0 * bilateral_sigma * bilateral_sigma));
 	}
 
+	// Thickness Blur_Gaussian Kernel
+	for (int i = 0; i <= R2; i++) {
+		gaussian_kernel_Thickness[i] = exp(-1.0 * i * i / (2.0 * gaussian_sigma_Thickness * gaussian_sigma_Thickness));
+	}
+
+	for (int i = 0; i <= R2; i++) {
+		for (int j = 0; j <= R2; j++) {
+			if (i == 0 && j == 0) {
+				W_Thickness += gaussian_kernel_Thickness[i] * gaussian_kernel_Thickness[j];
+			}
+			else if (i == 0 || j == 0) {
+				W_Thickness += gaussian_kernel_Thickness[i] * gaussian_kernel_Thickness[j] * 2.0f;
+			}
+			else W_Thickness += gaussian_kernel_Thickness[i] * gaussian_kernel_Thickness[j] * 4.0f;
+		}
+	}
+
+	W_Thickness = sqrt(W_Thickness);
+
+	for (int i = 0; i <= R2; i++) {
+		gaussian_kernel_Thickness[i] /= W_Thickness;
+	}
+
+}
+
+static void initial_two_triangles() {
+	// Two Triangles VAO & VBO & EBO
 	glGenVertexArrays(1, &TwoTriangles_VAO);
 	glGenBuffers(1, &TwoTriangles_VBO);
 	glGenBuffers(1, &TwoTriangles_EBO);
@@ -80,6 +89,70 @@ static void PrepareParameter() {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(TwoTrianglesIndices), TwoTrianglesIndices, GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
+}
+
+static void initial_FBO() {
+
+	glGenFramebuffers(1, &FBO);
+}
+
+static void initial_texture() {
+
+	// Depth_Texture
+	glGenTextures(1, &DepthTexture);
+	glBindTexture(GL_TEXTURE_2D, DepthTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, Width, Height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	// Thickness_Texture
+	glGenTextures(1, &ThicknessTexture);
+	glBindTexture(GL_TEXTURE_2D, ThicknessTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	// Depth_Bilateral_Texture
+	glGenTextures(1, &Depth_BilateralFilter);
+	glBindTexture(GL_TEXTURE_2D, Depth_BilateralFilter);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	// Thickness_Gaussian_Texture
+	glGenTextures(1, &Thickness_GaussianBlur);
+	glBindTexture(GL_TEXTURE_2D, Thickness_GaussianBlur);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	// Normal_Texture
+	glGenTextures(1, &NormalTexture);
+	glBindTexture(GL_TEXTURE_2D, NormalTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+}
+
+void SSF_initial() {
+
+	initial_kernel();
+
+	initial_two_triangles();
+
+	initial_FBO();
+
+	initial_texture();
 }
 
 static void Draw(Camera camera, unsigned int VAO, Shader NowshaderProgram) {
@@ -121,13 +194,7 @@ static void getDepthTexture(Camera camera, unsigned int VAO) {
 	Shader DepthTextureShader("WithMVP.vs", "DepthTexture.fs");
 	//Texture
 	glActiveTexture(GL_TEXTURE0);
-	glGenTextures(1, &DepthTexture);
 	glBindTexture(GL_TEXTURE_2D, DepthTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, Width, Height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	//Framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 	//DepthTest
@@ -155,13 +222,7 @@ static void getThicknessTexture(Camera camera, unsigned int VAO) {
 	Shader ThicknessTextureShader("WithMVP.vs", "ThicknessTexture.fs");
 	//Texture
 	glActiveTexture(GL_TEXTURE1);
-	glGenTextures(1, &ThicknessTexture);
 	glBindTexture(GL_TEXTURE_2D, ThicknessTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	//Framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 	//Blend
@@ -195,13 +256,7 @@ static void DepthTexture_BilateralFilter() {
 	Shader BilateralFilter("NoMVP.vs", "BilateralFilter.fs");
 	//Texture
 	glActiveTexture(GL_TEXTURE2);
-	glGenTextures(1, &Depth_BilateralFilter);
 	glBindTexture(GL_TEXTURE_2D, Depth_BilateralFilter);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	//Framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 	//Framebuffer & Texture
@@ -216,7 +271,7 @@ static void DepthTexture_BilateralFilter() {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, DepthTexture);
 	BilateralFilter.UseShaderProgram();
-	BilateralFilter.setFloatArray("GaussianBlur", gaussian_kernel_Depth, R1);
+	BilateralFilter.setFloatArray("GaussianBlur", gaussian_kernel_Depth, R1 + 1);
 	BilateralFilter.setInt("R1", R1);
 	BilateralFilter.setFloatArray("BilateralFilter", bilateral_kernel, 256);
 	BilateralFilter.setInt("DepthTexture", 0);
@@ -238,13 +293,7 @@ static void ThicknessTexture_GaussianBlur() {
 	Shader GaussianBlur("NoMVP.vs", "GaussianBlur.fs");
 	//Texture
 	glActiveTexture(GL_TEXTURE3);
-	glGenTextures(1, &Thickness_GaussianBlur);
 	glBindTexture(GL_TEXTURE_2D, Thickness_GaussianBlur);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	//Framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 	//Framebuffer & Texture
@@ -259,7 +308,7 @@ static void ThicknessTexture_GaussianBlur() {
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, ThicknessTexture);
 	GaussianBlur.UseShaderProgram();
-	GaussianBlur.setFloatArray("GaussianBlur", gaussian_kernel_Thickness, R2);
+	GaussianBlur.setFloatArray("GaussianBlur", gaussian_kernel_Thickness, R2 + 1);
 	GaussianBlur.setInt("R2", R2);
 	GaussianBlur.setFloat("W", W_Thickness);
 	GaussianBlur.setInt("ThicknessTexture", 1);
@@ -281,13 +330,7 @@ static void getNormalTexture() {
 	Shader NormalTextureShader("NoMVP.vs", "NormalTexture.fs");
 	//Texture
 	glActiveTexture(GL_TEXTURE4);
-	glGenTextures(1, &NormalTexture);
 	glBindTexture(GL_TEXTURE_2D, NormalTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	//Framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
 	//Framebuffer & Texture
@@ -349,9 +392,6 @@ static void Rendering(GLFWwindow* window) {
 
 void ScreenSpaceFluids(GLFWwindow* window, Camera camera, unsigned int VAO) {
 
-	PrepareParameter();
-
-	glGenFramebuffers(1, &FBO);
 	getDepthTexture(camera, VAO);
 	getThicknessTexture(camera, VAO);
 
