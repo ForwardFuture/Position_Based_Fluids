@@ -5,21 +5,28 @@ out vec4 FragColor;
 
 uniform float GaussianBlur[31];
 uniform int R2;
-uniform float W;
 uniform int Screen_Width;
 uniform int Screen_Height;
-uniform sampler2D ThicknessTexture;
+uniform sampler2D Image;
+uniform bool Horizontal;
 
 void main() {
 
-	float tot = 0;
+	vec2 offset = 1.0 / textureSize(Image, 0);
+	vec3 Color = vec3(texture(Image, TexCoord)) * GaussianBlur[0];
 
-	for(int i = -R2; i <= R2; i++) {
-		for(int j = -R2; j <= R2; j++) {
-			tot += texture(ThicknessTexture, vec2(TexCoord.s + 1.0 * i / Screen_Width, TexCoord.t + 1.0 * j / Screen_Height)).r 
-			* GaussianBlur[abs(i)] * GaussianBlur[abs(j)];
+	if(Horizontal) {
+		for(int i = 1; i <= R2; i++) {
+			Color += vec3(texture(Image, TexCoord + vec2(offset.x * float(i), 0.0))) * GaussianBlur[i];
+			Color += vec3(texture(Image, TexCoord - vec2(offset.x * float(i), 0.0))) * GaussianBlur[i];
 		}
 	}
-	
-	FragColor = vec4(vec3(tot / W), 1.0);
+	else {
+		for(int i = 1; i <= R2; i++) {
+			Color += vec3(texture(Image, TexCoord + vec2(0.0, offset.y * float(i)))) * GaussianBlur[i];
+			Color += vec3(texture(Image, TexCoord - vec2(0.0, offset.y * float(i)))) * GaussianBlur[i];
+		}
+	}
+
+	FragColor = vec4(Color, 1.0);
 }
