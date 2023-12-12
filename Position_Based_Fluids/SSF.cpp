@@ -12,11 +12,12 @@ static unsigned int NormalTexture;
 
 static glm::mat4 MVP, model, view, projection;
 
+// NOTE: When changing R1/R2 here, remember to change relevant parameters in GaussianBlur.fs & BilateralFilter.fs
 static const int R1 = 3;
 static const int R2 = 30;
-static float gaussian_sigma_Depth = 1000.0f;
-static float gaussian_sigma_Thickness = 1000.0f;
-static float bilateral_sigma = 1000.0f;
+static float gaussian_sigma_Depth = 10.0f;
+static float gaussian_sigma_Thickness = 10.0f;
+static float bilateral_sigma = 10.0f;
 
 static float gaussian_kernel_Depth[R1 + 1];
 static float gaussian_kernel_Thickness[R2 + 1];
