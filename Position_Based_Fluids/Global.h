@@ -23,11 +23,13 @@ const float eps = 1e-6;
 const int INT_INF = 1e9;
 const float FLOAT_INF = 1e9;
 
+// Screen Size
 const float Width = GetSystemMetrics(SM_CXSCREEN);
 const float Height = GetSystemMetrics(SM_CYSCREEN);
 const int int_Width = (int)Width;
 const int int_Height = (int)Height;
 
+// Fluid Size
 const int ROW = 7;
 const int NUM = ROW * ROW * ROW;
 const float radius = 0.03f;

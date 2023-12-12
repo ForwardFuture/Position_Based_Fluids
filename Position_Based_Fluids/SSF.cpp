@@ -334,7 +334,7 @@ static void Rendering(GLFWwindow* window) {
 	shaderProgram.setInt("DepthTexture", 0);
 	shaderProgram.setInt("ThicknessTexture", 1);
 	shaderProgram.setInt("Depth_BilateralFilter", 2);
-	shaderProgram.setInt("Thickness_GaussianBlur", 3);
+	shaderProgram.setInt("Thickness_GaussianBlur", 3);		
 	shaderProgram.setInt("NormalTexture", 4);
 
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
