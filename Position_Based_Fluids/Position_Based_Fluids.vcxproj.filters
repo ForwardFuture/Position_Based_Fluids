@@ -64,29 +64,55 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="NoMVP.vs">
+    <None Include="Texture_Fetch_Shader\DepthTexture.fs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="shader.fs">
+    <None Include="Rendering_Shader\shader.fs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="DepthTexture.fs">
+    <None Include="Texture_Blur_Shader\BilateralFilter.fs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="WithMVP.vs">
+    <None Include="Texture_Blur_Shader\GaussianBlur.fs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="ThicknessTexture.fs">
+    <None Include="Texture_Fetch_Shader\NormalTexture.fs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="GaussianBlur.fs">
+    <None Include="Texture_Fetch_Shader\ThicknessTexture.fs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="BilateralFilter.fs">
+    <None Include="Universal_Shader\NoMVP.vs">
       <Filter>资源文件</Filter>
     </None>
-    <None Include="NormalTexture.fs">
+    <None Include="Universal_Shader\WithMVP.vs">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="Rendering_Shader\skybox.fs">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="Rendering_Shader\skybox.vs">
+      <Filter>资源文件</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="skybox\back.jpg">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="skybox\bottom.jpg">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="skybox\front.jpg">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="skybox\left.jpg">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="skybox\right.jpg">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="skybox\top.jpg">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

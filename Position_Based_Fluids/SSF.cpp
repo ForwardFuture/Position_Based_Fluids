@@ -1,14 +1,15 @@
 #include "SSF.h"
 
+// FBO
 static unsigned int FBO;
-
+// Fetch Texture
 static unsigned int DepthTexture;
 static unsigned int ThicknessTexture;
-
+static unsigned int NormalTexture;
+// Blur Texture
 static unsigned int Depth_BilateralFilter;
 static unsigned int Thickness_GaussianBlur_Horizontal;
 static unsigned int Thickness_GaussianBlur;
-static unsigned int NormalTexture;
 
 static glm::mat4 MVP, model, view, projection;
 
@@ -34,6 +35,51 @@ static unsigned int TwoTrianglesIndices[] = {
 	1, 2, 3
 };
 static unsigned int TwoTriangles_VAO, TwoTriangles_VBO, TwoTriangles_EBO;
+
+static float skyboxVertices[] = {
+	-1.0f,  1.0f, -1.0f,
+	-1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+
+	-1.0f, -1.0f,  1.0f,
+	-1.0f, -1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f,  1.0f,
+	-1.0f, -1.0f,  1.0f,
+
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+
+	-1.0f, -1.0f,  1.0f,
+	-1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f, -1.0f,  1.0f,
+	-1.0f, -1.0f,  1.0f,
+
+	-1.0f,  1.0f, -1.0f,
+	 1.0f,  1.0f, -1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	-1.0f,  1.0f,  1.0f,
+	-1.0f,  1.0f, -1.0f,
+
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f,  1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f,  1.0f,
+	 1.0f, -1.0f,  1.0f
+};
+static unsigned int skybox_VAO, skybox_VBO;
 
 static void initial_kernel() {
 	// Depth Blur_Gaussian Kernel
@@ -90,6 +136,21 @@ static void initial_two_triangles() {
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, TwoTriangles_EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(TwoTrianglesIndices), TwoTrianglesIndices, GL_STATIC_DRAW);
+
+	glBindVertexArray(0);
+}
+
+static void initial_skybox() {
+	// skybox VAO & VBO
+	glGenVertexArrays(1, &skybox_VAO);
+	glGenBuffers(1, &skybox_VBO);
+
+	glBindVertexArray(skybox_VAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, skybox_VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
 
 	glBindVertexArray(0);
 }
@@ -162,6 +223,8 @@ void SSF_initial() {
 
 	initial_two_triangles();
 
+	initial_skybox();
+
 	initial_FBO();
 
 	initial_texture();
@@ -203,7 +266,7 @@ static void Draw(Camera camera, unsigned int VAO, Shader NowshaderProgram) {
 static void getDepthTexture(Camera camera, unsigned int VAO) {
 	
 	//Shader
-	Shader DepthTextureShader("WithMVP.vs", "DepthTexture.fs");
+	Shader DepthTextureShader("./Universal_Shader/WithMVP.vs", "./Texture_Fetch_Shader/DepthTexture.fs");
 	//Texture
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, DepthTexture);
@@ -231,7 +294,7 @@ static void getDepthTexture(Camera camera, unsigned int VAO) {
 static void getThicknessTexture(Camera camera, unsigned int VAO) {
 
 	//Shader
-	Shader ThicknessTextureShader("WithMVP.vs", "ThicknessTexture.fs");
+	Shader ThicknessTextureShader("./Universal_Shader/WithMVP.vs", "./Texture_Fetch_Shader/ThicknessTexture.fs");
 	//Texture
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, ThicknessTexture);
@@ -265,7 +328,7 @@ static void getThicknessTexture(Camera camera, unsigned int VAO) {
 static void DepthTexture_BilateralFilter() {
 	
 	//Shader
-	Shader BilateralFilter("NoMVP.vs", "BilateralFilter.fs");
+	Shader BilateralFilter("./Universal_Shader/NoMVP.vs", "./Texture_Blur_Shader/BilateralFilter.fs");
 	//Texture
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, Depth_BilateralFilter);
@@ -372,7 +435,7 @@ static void Two_Step_GaussianBlur(Shader GaussianBlur) {
 static void ThicknessTexture_GaussianBlur() {
 
 	//Shader
-	Shader GaussianBlur("NoMVP.vs", "GaussianBlur.fs");
+	Shader GaussianBlur("./Universal_Shader/NoMVP.vs", "./Texture_Blur_Shader/GaussianBlur.fs");
 
 	One_Step_GaussianBlur(GaussianBlur);
 
@@ -382,7 +445,7 @@ static void ThicknessTexture_GaussianBlur() {
 static void getNormalTexture() {
 
 	//Shader
-	Shader NormalTextureShader("NoMVP.vs", "NormalTexture.fs");
+	Shader NormalTextureShader("./Universal_Shader/NoMVP.vs", "./Texture_Fetch_Shader/NormalTexture.fs");
 	//Texture
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, NormalTexture);
@@ -413,9 +476,23 @@ static void getNormalTexture() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-static void Rendering(GLFWwindow* window) {
+static void Rendering_skybox() {
 
-	Shader shaderProgram("NoMVP.vs", "shader.fs");
+}
+
+static void Rendering_fluid() {
+
+}
+
+static void Rendering(Camera camera, GLFWwindow* window) {
+
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	Rendering_skybox();
+	Rendering_fluid();
+
+	Shader shaderProgram("./Universal_Shader/NoMVP.vs", "./Rendering_Shader/shader.fs");
 	shaderProgram.UseShaderProgram();
 
 	glBindVertexArray(TwoTriangles_VAO);
@@ -434,9 +511,8 @@ static void Rendering(GLFWwindow* window) {
 	shaderProgram.setInt("Depth_BilateralFilter", 2);
 	shaderProgram.setInt("Thickness_GaussianBlur", 3);		
 	shaderProgram.setInt("NormalTexture", 4);
-
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	shaderProgram.setFloatVec("CameraPos", camera.GetPosition());
+	shaderProgram.setFloatVec("Front", camera.GetFront());
 
 	glDrawElements(GL_TRIANGLES, 3 * 2, GL_UNSIGNED_INT, 0);
 
@@ -454,5 +530,5 @@ void ScreenSpaceFluids(GLFWwindow* window, Camera camera, unsigned int VAO) {
 	ThicknessTexture_GaussianBlur();
 	getNormalTexture();
 
-	Rendering(window);
+	Rendering(camera, window);
 }

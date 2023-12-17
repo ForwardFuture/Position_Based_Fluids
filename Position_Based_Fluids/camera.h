@@ -30,4 +30,6 @@ public:
 
 	glm::mat4 GetViewMatrix()const;
 	float GetFOV()const;
+	glm::vec3 GetPosition()const;
+	glm::vec3 GetFront()const;
 };

@@ -129,3 +129,11 @@ glm::mat4 Camera::GetViewMatrix()const {
 float Camera::GetFOV()const {
 	return fov;
 }
+
+glm::vec3 Camera::GetPosition()const {
+	return Position;
+}
+
+glm::vec3 Camera::GetFront()const {
+	return Front;
+}

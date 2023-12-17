@@ -38,14 +38,24 @@
     <ClInclude Include="SSF.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="BilateralFilter.fs" />
-    <None Include="DepthTexture.fs" />
-    <None Include="GaussianBlur.fs" />
-    <None Include="NormalTexture.fs" />
-    <None Include="shader.fs" />
-    <None Include="NoMVP.vs" />
-    <None Include="ThicknessTexture.fs" />
-    <None Include="WithMVP.vs" />
+    <None Include="Rendering_Shader\shader.fs" />
+    <None Include="Rendering_Shader\skybox.fs" />
+    <None Include="Rendering_Shader\skybox.vs" />
+    <None Include="Texture_Blur_Shader\BilateralFilter.fs" />
+    <None Include="Texture_Blur_Shader\GaussianBlur.fs" />
+    <None Include="Texture_Fetch_Shader\DepthTexture.fs" />
+    <None Include="Texture_Fetch_Shader\NormalTexture.fs" />
+    <None Include="Texture_Fetch_Shader\ThicknessTexture.fs" />
+    <None Include="Universal_Shader\NoMVP.vs" />
+    <None Include="Universal_Shader\WithMVP.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="skybox\back.jpg" />
+    <Image Include="skybox\bottom.jpg" />
+    <Image Include="skybox\front.jpg" />
+    <Image Include="skybox\left.jpg" />
+    <Image Include="skybox\right.jpg" />
+    <Image Include="skybox\top.jpg" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

@@ -12,7 +12,8 @@ public:
 
 	void setBool(const std::string name, bool value)const;
 	void setInt(const std::string name, int value)const;
-	void setFloat(const std::string names, float value)const;
+	void setFloat(const std::string name, float value)const;
+	void setFloatVec(const std::string name, glm::vec3 vec)const;
 	void setFloatArray(const std::string name, float* arr, int length)const;
 	void setMatrix(const std::string name, glm::mat4 matrix)const;
 };
