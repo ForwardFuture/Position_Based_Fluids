@@ -42,6 +42,9 @@
     <ClCompile Include="SSF.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="stb_image.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader.h">
@@ -60,6 +63,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="SSF.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,6 +2,8 @@
 
 // FBO
 static unsigned int FBO;
+// skybox Texture
+static unsigned int SkyboxTexture;
 // Fetch Texture
 static unsigned int DepthTexture;
 static unsigned int ThicknessTexture;
@@ -162,6 +164,34 @@ static void initial_FBO() {
 
 static void initial_texture() {
 
+	// Skybox_Texture
+	glGenTextures(1, &SkyboxTexture);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, SkyboxTexture);
+
+	int width, height, nrChannels;
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	std::string s[6] = { "right.jpg","left.jpg","top.jpg",
+						"bottom.jpg","front.jpg","back.jpg" };
+	for (int i = 0; i < 6; i++)
+	{
+		unsigned char* data = stbi_load(("./skybox/" + s[i]).c_str(), &width, &height, &nrChannels, 0);
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+				0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			stbi_image_free(data);
+		}
+		else
+		{
+			std::cout << "Cubemap texture failed to load at path: " << s[i] << std::endl;
+			stbi_image_free(data);
+		}
+	}
+
 	// Depth_Texture
 	glGenTextures(1, &DepthTexture);
 	glBindTexture(GL_TEXTURE_2D, DepthTexture);
@@ -250,7 +280,7 @@ static void Draw(Camera camera, unsigned int VAO, Shader NowshaderProgram) {
 
 		//projection matrix
 		projection = glm::mat4(1.0f);
-		projection = glm::perspective(glm::radians(camera.GetFOV()), Width / Height, 0.1f, 100.0f);
+		projection = glm::perspective(glm::radians(camera.GetFOV()), Width / Height, camera.nearPlane, camera.farPlane);
 
 		MVP = projection * view * model;
 
@@ -476,21 +506,27 @@ static void getNormalTexture() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-static void Rendering_skybox() {
+static void Rendering_skybox(Camera camera) {
 
+	Shader SkyboxShader("./Rendering_Shader/skybox.vs", "./Rendering_Shader/skybox.fs");
+	SkyboxShader.UseShaderProgram();
+
+	glBindVertexArray(skybox_VAO);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, SkyboxTexture);
+	SkyboxShader.setMatrix("view", glm::mat4(glm::mat3(camera.GetViewMatrix())));
+	SkyboxShader.setMatrix("projection", glm::perspective(glm::radians(camera.GetFOV()), Width / Height, camera.nearPlane, camera.farPlane));
+	SkyboxShader.setInt("skybox", 0);
+
+	glDepthMask(GL_FALSE);
+
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	glDepthMask(GL_TRUE);
+	glBindVertexArray(0);
 }
 
-static void Rendering_fluid() {
-
-}
-
-static void Rendering(Camera camera, GLFWwindow* window) {
-
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	Rendering_skybox();
-	Rendering_fluid();
+static void Rendering_fluid(Camera camera, GLFWwindow* window) {
 
 	Shader shaderProgram("./Universal_Shader/NoMVP.vs", "./Rendering_Shader/shader.fs");
 	shaderProgram.UseShaderProgram();
@@ -509,16 +545,27 @@ static void Rendering(Camera camera, GLFWwindow* window) {
 	shaderProgram.setInt("DepthTexture", 0);
 	shaderProgram.setInt("ThicknessTexture", 1);
 	shaderProgram.setInt("Depth_BilateralFilter", 2);
-	shaderProgram.setInt("Thickness_GaussianBlur", 3);		
+	shaderProgram.setInt("Thickness_GaussianBlur", 3);
 	shaderProgram.setInt("NormalTexture", 4);
 	shaderProgram.setFloatVec("CameraPos", camera.GetPosition());
 	shaderProgram.setFloatVec("Front", camera.GetFront());
 
 	glDrawElements(GL_TRIANGLES, 3 * 2, GL_UNSIGNED_INT, 0);
 
+	glBindVertexArray(0);
+
+}
+
+static void Rendering(Camera camera, GLFWwindow* window) {
+
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	Rendering_skybox(camera);
+	Rendering_fluid(camera, window);
+
 	glfwSwapBuffers(window);
 
-	glBindVertexArray(0);
 }
 
 void ScreenSpaceFluids(GLFWwindow* window, Camera camera, unsigned int VAO) {
