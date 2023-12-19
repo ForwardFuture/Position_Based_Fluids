@@ -555,8 +555,8 @@ static void Rendering_fluid(Camera camera, GLFWwindow* window) {
 	shaderProgram.setFloatVec("Front", camera.GetFront());
 	shaderProgram.setFloat("Width", Width);
 	shaderProgram.setFloat("Height", Height);
-	shaderProgram.setMatrix("VP", camera.GetViewMatrix() *
-		glm::perspective(glm::radians(camera.GetFOV()), Width / Height, camera.nearPlane, camera.farPlane));
+	shaderProgram.setMatrix("VP", glm::perspective(glm::radians(camera.GetFOV()), Width / Height, camera.nearPlane, camera.farPlane) *
+		camera.GetViewMatrix());
 
 	glDrawElements(GL_TRIANGLES, 3 * 2, GL_UNSIGNED_INT, 0);
 
