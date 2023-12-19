@@ -6,6 +6,10 @@ out vec4 FragColor;
 uniform sampler2D Depth_BilateralFilter;
 uniform int Screen_Width;
 uniform int Screen_Height;
+uniform vec3 Front;
+
+float Widthstep = 2.0 / Screen_Width;
+float Heightstep = 2.0 / Screen_Height;
 
 void main() {
 
@@ -17,23 +21,21 @@ void main() {
 	}
 
 	vec3 x_z = vec3(0.0, 0.0, 0.0);
-	float x_positive = texture(Depth_BilateralFilter, vec2(TexCoord.s + 1.0 / Screen_Width, TexCoord.t)).r;
-	float x_negative = texture(Depth_BilateralFilter, vec2(TexCoord.s - 1.0 / Screen_Width, TexCoord.t)).r;
+	float x_positive = texture(Depth_BilateralFilter, vec2(TexCoord.s + Widthstep, TexCoord.t)).r;
+	float x_negative = texture(Depth_BilateralFilter, vec2(TexCoord.s - Widthstep, TexCoord.t)).r;
 	if(abs(depth - x_positive) < abs(depth - x_negative))
-		x_z = vec3(1.0 / Screen_Width, 0.0, (x_positive - depth) * Screen_Width);
-	else x_z = vec3(-1.0 / Screen_Width, 0.0, (x_negative - depth) * Screen_Width);
+		x_z = vec3(Widthstep, 0.0, (x_positive - depth));
+	else x_z = vec3(-Widthstep, 0.0, (x_negative - depth));
 
 	vec3 y_z = vec3(0.0, 0.0, 0.0);
-	float y_positive = texture(Depth_BilateralFilter, vec2(TexCoord.s, TexCoord.t + 1.0 / Screen_Height)).r;
-	float y_negative = texture(Depth_BilateralFilter, vec2(TexCoord.s, TexCoord.t - 1.0 / Screen_Height)).r;
+	float y_positive = texture(Depth_BilateralFilter, vec2(TexCoord.s, TexCoord.t + Heightstep)).r;
+	float y_negative = texture(Depth_BilateralFilter, vec2(TexCoord.s, TexCoord.t - Heightstep)).r;
 	if(abs(depth - y_positive) < abs(depth - y_negative))
-		y_z = vec3(0.0, 1.0 / Screen_Height, (y_positive - depth) * Screen_Height);
-	else y_z = vec3(0.0, -1.0 / Screen_Height, (y_negative - depth) * Screen_Height);
+		y_z = vec3(0.0, Heightstep, (y_positive - depth));
+	else y_z = vec3(0.0, -Heightstep, (y_negative - depth));
 
-	vec3 z = vec3(x_z[1] * y_z[2] - x_z[2] * y_z[1], x_z[2] * y_z[0] - x_z[0] * y_z[2], x_z[0] * y_z[1] - x_z[1] * y_z[0]);
-	if(z.z < 0) z = -z;
-	float len = sqrt(z.x * z.x + z.y * z.y + z.z * z.z);
-	z = z / len;
+	vec3 z = normalize(vec3(x_z[1] * y_z[2] - x_z[2] * y_z[1], x_z[2] * y_z[0] - x_z[0] * y_z[2], x_z[0] * y_z[1] - x_z[1] * y_z[0]));
+	if(dot(-Front, z) < 0) z = -z;
 
-	FragColor = vec4((z.x + 1.0) / 2.0, (z.y + 1.0) / 2.0, (z.z + 1.0) / 2.0, 1.0);
+	FragColor = vec4((z + vec3(1.0)) / 2.0, 1.0);
 }

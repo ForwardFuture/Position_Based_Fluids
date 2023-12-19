@@ -472,7 +472,7 @@ static void ThicknessTexture_GaussianBlur() {
 	Two_Step_GaussianBlur(GaussianBlur);
 }
 
-static void getNormalTexture() {
+static void getNormalTexture(Camera camera) {
 
 	//Shader
 	Shader NormalTextureShader("./Universal_Shader/NoMVP.vs", "./Texture_Fetch_Shader/NormalTexture.fs");
@@ -496,6 +496,7 @@ static void getNormalTexture() {
 	NormalTextureShader.setInt("Depth_BilateralFilter", 2);
 	NormalTextureShader.setInt("Screen_Width", Width);
 	NormalTextureShader.setInt("Screen_Height", Height);
+	NormalTextureShader.setFloatVec("Front", camera.GetFront());
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -542,13 +543,20 @@ static void Rendering_fluid(Camera camera, GLFWwindow* window) {
 	glBindTexture(GL_TEXTURE_2D, Thickness_GaussianBlur);
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, NormalTexture);
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, SkyboxTexture);
 	shaderProgram.setInt("DepthTexture", 0);
 	shaderProgram.setInt("ThicknessTexture", 1);
 	shaderProgram.setInt("Depth_BilateralFilter", 2);
 	shaderProgram.setInt("Thickness_GaussianBlur", 3);
 	shaderProgram.setInt("NormalTexture", 4);
+	shaderProgram.setInt("skybox", 5);
 	shaderProgram.setFloatVec("CameraPos", camera.GetPosition());
 	shaderProgram.setFloatVec("Front", camera.GetFront());
+	shaderProgram.setFloat("Width", Width);
+	shaderProgram.setFloat("Height", Height);
+	shaderProgram.setMatrix("VP", camera.GetViewMatrix() *
+		glm::perspective(glm::radians(camera.GetFOV()), Width / Height, camera.nearPlane, camera.farPlane));
 
 	glDrawElements(GL_TRIANGLES, 3 * 2, GL_UNSIGNED_INT, 0);
 
@@ -575,7 +583,7 @@ void ScreenSpaceFluids(GLFWwindow* window, Camera camera, unsigned int VAO) {
 
 	DepthTexture_BilateralFilter();
 	ThicknessTexture_GaussianBlur();
-	getNormalTexture();
+	getNormalTexture(camera);
 
 	Rendering(camera, window);
 }
