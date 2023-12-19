@@ -117,7 +117,7 @@ int main() {
 		WindowCheck(window);
 
 		//Position_Based_Fluids Simulation
-		PositionBasedFluids();
+		//PositionBasedFluids();
 
 		//Screen_Space_Fluids Rendering
 		ScreenSpaceFluids(window, camera, VAO);

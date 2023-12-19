@@ -36,6 +36,6 @@ const int ROW = 7;
 const int NUM = ROW * ROW * ROW;
 const float radius = 0.03f;
 const float distance = 0.015f;
-const float halflen = 1.0f * ROW * distance;
+const float halflen = 1.0f * (ROW - 1) * distance;
 const float Bound = halflen + 4.0f * distance;
 const float Yoffset = 0.4f;
