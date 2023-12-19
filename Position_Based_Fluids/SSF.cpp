@@ -496,7 +496,11 @@ static void getNormalTexture(Camera camera) {
 	NormalTextureShader.setInt("Depth_BilateralFilter", 2);
 	NormalTextureShader.setInt("Screen_Width", Width);
 	NormalTextureShader.setInt("Screen_Height", Height);
-	NormalTextureShader.setFloatVec("Front", camera.GetFront());
+	NormalTextureShader.setFloat("Width", Width);
+	NormalTextureShader.setFloat("Height", Height);
+	NormalTextureShader.setFloatVec("CameraPos", camera.GetPosition());
+	NormalTextureShader.setMatrix("VP", glm::perspective(glm::radians(camera.GetFOV()), Width / Height, camera.nearPlane, camera.farPlane) *
+		camera.GetViewMatrix());
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);

@@ -28,7 +28,14 @@ float n = 1.33;
 float F0 = pow((1.0 - n) / (1.0 + n), 2.0);
 
 float fresnel(float costheta) {
-	return F0 + (1 - F0) * pow(1.0 - costheta, 5.0);
+	return F0 + (1.0 - F0) * pow(1.0 - costheta, 5.0);
+}
+
+vec3 getWorldSpace(float x, float y, float z) {
+	// Necessities: Depth_BilateralFilter, VP
+	vec4 ClipSpace = vec4(x, y, z, 1.0);
+	vec4 WorldSpaceStar = inverse(VP) * ClipSpace;
+	return WorldSpaceStar.xyz / WorldSpaceStar.w;
 }
 
 void main() {
@@ -39,13 +46,8 @@ void main() {
 	//FragColor = texture(NormalTexture, TexCoord);
 
 	// ViewDir
-	float x, y, z;
-	x = 2.0 * (gl_FragCoord.x / Width) - 1.0;
-	y = 2.0 * (gl_FragCoord.y / Height) - 1.0;
-	z = 2.0 * (texture(Depth_BilateralFilter, TexCoord).r) - 1.0;
-	vec4 ClipSpace = vec4(x, y, z, 1.0);
-	vec4 WorldSpaceStar = inverse(VP) * ClipSpace;
-	vec3 WorldSpace = WorldSpaceStar.xyz / WorldSpaceStar.w;
+	vec3 WorldSpace = getWorldSpace(2.0 * (gl_FragCoord.x / Width) - 1.0, 2.0 * (gl_FragCoord.y / Height) - 1.0, 
+		2.0 * (texture(Depth_BilateralFilter, TexCoord).r) - 1.0);
 	
 	vec3 viewDir = CameraPos - WorldSpace;
 	vec3 normalized_viewDir = normalize(viewDir);
@@ -54,13 +56,14 @@ void main() {
 	vec3 TexNormal = vec3(texture(NormalTexture, TexCoord));
 	if(abs(TexNormal.x) < eps && abs(TexNormal.y) < eps && abs(TexNormal.z) < eps)
 		discard;
-	TexNormal = 2.0 * normalize(TexNormal) - normalize(vec3(1.0));
+	TexNormal = 2.0 * TexNormal - vec3(1.0);
 	
-	vec3 N = -Front;
-	vec3 B = vec3(0.0, 1.0, 0.0);
-	vec3 T = normalize(cross(B, N));
-	mat3 TBN = mat3(T, B, N);
-	vec3 Normal = normalize(TBN * TexNormal);
+	//vec3 N = -Front;
+	//vec3 B = vec3(0.0, 1.0, 0.0);
+	//vec3 T = normalize(cross(B, N));
+	//mat3 TBN = mat3(T, B, N);
+	//vec3 Normal = normalize(TBN * TexNormal);
+	vec3 Normal = TexNormal;
 
 	// Shading
 	float Fresnel = fresnel(dot(normalized_viewDir, Normal));
@@ -68,7 +71,10 @@ void main() {
 	float beta = Thickness * gamma;
 	vec3 a = mix(fluid_color, vec3(texture(skybox, -viewDir + beta * Normal)), exp(-Thickness));//need calculation
 
-	FragColor = vec4(a * (1 - Fresnel), 1.0);
+	FragColor = vec4(a * (1.0 - Fresnel), 1.0);
+
+	FragColor = vec4((Normal + vec3(1.0)) / 2.0, 1.0);
+	//FragColor = vec4((normalized_viewDir + vec3(1.0)) / 2.0, 1.0);
 
 	//vec3 halfDir;
 }
