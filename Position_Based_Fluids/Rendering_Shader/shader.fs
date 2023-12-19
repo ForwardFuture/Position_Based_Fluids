@@ -47,13 +47,14 @@ void main() {
 	vec4 WorldSpaceStar = inverse(VP) * ClipSpace;
 	vec3 WorldSpace = WorldSpaceStar.xyz / WorldSpaceStar.w;
 	
-	vec3 viewDir = normalize(CameraPos - WorldSpace);
+	vec3 viewDir = CameraPos - WorldSpace;
+	vec3 normalized_viewDir = normalize(viewDir);
 
 	// Normal(Still have problems)
 	vec3 TexNormal = vec3(texture(NormalTexture, TexCoord));
 	if(abs(TexNormal.x) < eps && abs(TexNormal.y) < eps && abs(TexNormal.z) < eps)
 		discard;
-	TexNormal = 2.0 * TexNormal - vec3(1.0);
+	TexNormal = 2.0 * normalize(TexNormal) - normalize(vec3(1.0));
 	
 	vec3 N = -Front;
 	vec3 B = vec3(0.0, 1.0, 0.0);
@@ -62,12 +63,12 @@ void main() {
 	vec3 Normal = normalize(TBN * TexNormal);
 
 	// Shading
-	float Fresnel = fresnel(dot(viewDir, Normal));
+	float Fresnel = fresnel(dot(normalized_viewDir, Normal));
 	float Thickness = texture(Thickness_GaussianBlur, TexCoord).r;
 	float beta = Thickness * gamma;
-	vec3 a = mix(fluid_color, vec3(texture(skybox, WorldSpace + beta * Normal)), exp(-Thickness));
+	vec3 a = mix(fluid_color, vec3(texture(skybox, -viewDir + beta * Normal)), exp(-Thickness));//need calculation
 
-	FragColor = vec4(a * (1 - Fresnel), 1.0)
+	FragColor = vec4(a * (1 - Fresnel), 1.0);
 
 	//vec3 halfDir;
 }
