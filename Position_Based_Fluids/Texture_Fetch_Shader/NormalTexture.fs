@@ -36,6 +36,7 @@ void main() {
 
 	vec3 Origin = getWorldSpace(2.0 * x - 1.0, 2.0 * y - 1.0, 2.0 * depth - 1.0);
 
+	// get derivative on X axis
 	vec3 x_z = vec3(0.0, 0.0, 0.0);
 	float x_positive_depth = texture(Depth_BilateralFilter, vec2(TexCoord.s + WidthStep, TexCoord.t)).r;
 	vec3 x_positive = getWorldSpace(2.0 * (x + WidthStep) - 1.0, 2.0 * y - 1.0, 2.0 * x_positive_depth - 1.0);
@@ -45,6 +46,7 @@ void main() {
 		x_z = x_positive - Origin;
 	else x_z = Origin - x_negative;
 
+	// get derivative on Y axis
 	vec3 y_z = vec3(0.0, 0.0, 0.0);
 	float y_positive_depth = texture(Depth_BilateralFilter, vec2(TexCoord.s, TexCoord.t + HeightStep)).r;
 	vec3 y_positive = getWorldSpace(2.0 * x - 1.0, 2.0 * (y + HeightStep) - 1.0, 2.0 * y_positive_depth - 1.0);
@@ -59,5 +61,5 @@ void main() {
 
 	vec3 z = normalize(cross(x_z, y_z));
 
-	FragColor = vec4((x_z + vec3(1.0)) / 2.0, 1.0);
+	FragColor = vec4((z + vec3(1.0)) / 2.0, 1.0);
 }

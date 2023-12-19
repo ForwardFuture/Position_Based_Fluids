@@ -71,9 +71,10 @@ void main() {
 	float beta = Thickness * gamma;
 	vec3 a = mix(fluid_color, vec3(texture(skybox, -viewDir + beta * Normal)), exp(-Thickness));//need calculation
 
-	FragColor = vec4(a * (1.0 - Fresnel), 1.0);
+	FragColor = vec4(a * clamp(0.0, 1.0, 1.0 - Fresnel), 1.0);// clamp???
+	//FragColor = vec4(vec3(clamp(0.0, 1.0, 1.0 - Fresnel)), 1.0);
 
-	FragColor = vec4((Normal + vec3(1.0)) / 2.0, 1.0);
+	//FragColor = vec4((Normal + vec3(1.0)) / 2.0, 1.0);
 	//FragColor = vec4((normalized_viewDir + vec3(1.0)) / 2.0, 1.0);
 
 	//vec3 halfDir;
