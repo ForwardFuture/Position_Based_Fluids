@@ -555,12 +555,17 @@ static void Rendering_fluid(Camera camera, GLFWwindow* window) {
 	shaderProgram.setInt("Thickness_GaussianBlur", 3);
 	shaderProgram.setInt("NormalTexture", 4);
 	shaderProgram.setInt("skybox", 5);
+
 	shaderProgram.setFloatVec("CameraPos", camera.GetPosition());
 	shaderProgram.setFloatVec("Front", camera.GetFront());
 	shaderProgram.setFloat("Width", Width);
 	shaderProgram.setFloat("Height", Height);
 	shaderProgram.setMatrix("VP", glm::perspective(glm::radians(camera.GetFOV()), Width / Height, camera.nearPlane, camera.farPlane) *
 		camera.GetViewMatrix());
+	for (int i = 0; i < 5; i++) {
+		shaderProgram.setFloatVec("light[" + std::to_string(i) + "].Position", light[i].Position);
+		shaderProgram.setFloatVec("light[" + std::to_string(i) + "].Intensity", light[i].Intensity);
+	}
 
 	glDrawElements(GL_TRIANGLES, 3 * 2, GL_UNSIGNED_INT, 0);
 

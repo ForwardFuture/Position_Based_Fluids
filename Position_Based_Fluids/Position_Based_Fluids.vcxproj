@@ -22,6 +22,7 @@
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="KDTree.cpp" />
+    <ClCompile Include="light.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="particles.cpp" />
     <ClCompile Include="PBF.cpp" />
@@ -34,6 +35,7 @@
     <ClInclude Include="camera.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="KDTree.h" />
+    <ClInclude Include="light.h" />
     <ClInclude Include="PBF.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="SSF.h" />

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Global.h"
+#include "light.h"
 #include "camera.h"
 #include "shader.h"
 #include "particles.h"
