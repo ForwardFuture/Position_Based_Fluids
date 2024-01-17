@@ -20,15 +20,22 @@ uniform mat4 VP;
 
 float eps = 1e-6;
 
-vec3 fluid_color = vec3(0.36078431, 0.7019607843, 0.8);
+vec3 fluid_color = vec3(0.361f, 0.702f, 0.8f);
 vec3 Ks = vec3(1.0);
 int alpha = 32;
 float gamma = 0.1;
 float n = 1.33;
-float F0 = pow((1.0 - n) / (1.0 + n), 2.0);
+float F0 = pow((1.0f - n) / (1.0f + n), 2);
+
+bool isnan(float val) {//NOTE: During calculation the value of Fresnel turns to NAN
+  return (val < 0.0 || 0.0 < val || val == 0.0) ? false : true;
+}
 
 float fresnel(float costheta) {
-	return F0 + (1.0 - F0) * pow(1.0 - costheta, 5.0);
+	//NOTE: The outcome of pow may be NAN due to multiple solutions(in the case of the base is less than zero)
+	float k = 1.0f - costheta;
+	if(k < 0) k = eps;
+	return F0 + (1.0f - F0) * pow(k, 5);
 }
 
 vec3 getWorldSpace(float x, float y, float z) {
@@ -70,12 +77,13 @@ void main() {
 	float Thickness = texture(Thickness_GaussianBlur, TexCoord).r;
 	float beta = Thickness * gamma;
 	vec3 a = mix(fluid_color, vec3(texture(skybox, -viewDir + beta * Normal)), exp(-Thickness));//need calculation
+	vec3 b = vec3(texture(skybox, reflect(-viewDir, Normal)));
 
-	FragColor = vec4(a * clamp(0.0, 1.0, 1.0 - Fresnel), 1.0);// clamp???
+	FragColor = vec4(a * (1.0f - Fresnel) + b * Fresnel, 1.0f);
+	
 	//FragColor = vec4(vec3(clamp(0.0, 1.0, 1.0 - Fresnel)), 1.0);
-
 	//FragColor = vec4((Normal + vec3(1.0)) / 2.0, 1.0);
 	//FragColor = vec4((normalized_viewDir + vec3(1.0)) / 2.0, 1.0);
-
-	//vec3 halfDir;
+	//FragColor = vec4(Normal, 1.0);
+	//FragColor = vec4(normalized_viewDir, 1.0);
 }

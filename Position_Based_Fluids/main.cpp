@@ -7,7 +7,7 @@
 #include "SSF.h"
 
 //glm::vec3 MyPos = glm::vec3(halflen, halflen * 2.0f, halflen * 8.0f);
-glm::vec3 MyPos = glm::vec3(0.0f, halflen * 4.0f, halflen * 8.0f);
+glm::vec3 MyPos = glm::vec3(0.0f, -halflen, halflen * 8.0f);
 Camera camera = Camera(MyPos, glm::vec3(0.0f) - MyPos);
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -117,7 +117,7 @@ int main() {
 		WindowCheck(window);
 
 		//Position_Based_Fluids Simulation
-		PositionBasedFluids();
+		//PositionBasedFluids();
 
 		//Screen_Space_Fluids Rendering
 		ScreenSpaceFluids(window, camera, VAO);

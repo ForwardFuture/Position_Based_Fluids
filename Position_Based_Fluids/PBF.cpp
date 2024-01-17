@@ -346,6 +346,7 @@ void PositionBasedFluids() {
 			KDTree::neighboring.pop();
 		}
 	}
+	
 
 	//Step 3: Position Update Iteration
 	for (int NowIter = 1; NowIter <= MaxIteration; NowIter++) {
