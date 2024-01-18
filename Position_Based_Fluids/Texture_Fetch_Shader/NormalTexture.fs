@@ -12,8 +12,8 @@ uniform vec3 CameraPos;
 
 uniform mat4 VP;
 
-float WidthStep = 2.0 / Width;
-float HeightStep = 2.0 / Height;
+float WidthStep = 1.0 / Width;
+float HeightStep = 1.0 / Height;
 
 vec3 getWorldSpace(float x, float y, float z) {
 	// Necessities: Depth_BilateralFilter, VP
@@ -28,7 +28,7 @@ void main() {
 
 	if(abs(depth - 1.0) < 0.00001){
 		FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-		return;
+		discard;
 	}
 
 	float x = gl_FragCoord.x / Width;

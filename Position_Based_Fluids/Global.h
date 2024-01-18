@@ -31,10 +31,16 @@ const float Height = GetSystemMetrics(SM_CYSCREEN);
 const int int_Width = (int)Width;
 const int int_Height = (int)Height;
 
+// Sphere Size
+const int Y_SEGMENTS = 20;
+const int X_SEGMENTS = 40;
+const int tot_vertices_number = (Y_SEGMENTS + 1) * (X_SEGMENTS + 1);
+const int tot_triangles_number = (Y_SEGMENTS - 2) * X_SEGMENTS * 2 + 2 * X_SEGMENTS;
+
 // Fluid Size
 const int ROW = 7;
 const int NUM = ROW * ROW * ROW;
-const float radius = 0.03f;
+const float radius = 0.025f;
 const float distance = 0.015f;
 const float halflen = 1.0f * (ROW - 1) * distance;
 const float Bound = halflen + 4.0f * distance;

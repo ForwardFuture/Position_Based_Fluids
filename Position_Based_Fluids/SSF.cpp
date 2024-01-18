@@ -273,6 +273,7 @@ static void Draw(Camera camera, unsigned int VAO, Shader NowshaderProgram) {
 		//model matrix
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, particles[i].Pos);
+		model = glm::scale(model, glm::vec3(radius));
 
 		//view matrix
 		view = glm::mat4(1.0f);
@@ -286,7 +287,7 @@ static void Draw(Camera camera, unsigned int VAO, Shader NowshaderProgram) {
 
 		NowshaderProgram.setMatrix("MVP", MVP);
 
-		glDrawElements(GL_TRIANGLES, 3 * 8, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, 3 * tot_triangles_number, GL_UNSIGNED_INT, 0);
 	}
 
 	//Unbind VAO

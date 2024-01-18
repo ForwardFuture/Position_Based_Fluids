@@ -54,11 +54,6 @@ vec3 getWorldSpace(float x, float y, float z) {
 }
 
 void main() {
-	//FragColor = vec4(vec3(texture(DepthTexture, TexCoord).r), 1.0);
-	//FragColor = texture(ThicknessTexture, TexCoord);
-	//FragColor = texture(Depth_BilateralFilter, TexCoord);
-	//FragColor = texture(Thickness_GaussianBlur, TexCoord);
-	//FragColor = texture(NormalTexture, TexCoord);
 
 	// ViewDir
 	vec3 WorldSpace = getWorldSpace(2.0 * (gl_FragCoord.x / Width) - 1.0, 2.0 * (gl_FragCoord.y / Height) - 1.0, 
@@ -99,11 +94,15 @@ void main() {
 		SpecularTerm += Ks * pow(dot(Normal, halfDir), alpha) * light[i].Intensity;
 	}
 
-	FragColor = vec4(a * (1.0f - Fresnel) + b * Fresnel + SpecularTerm, 1.0f);
+	//Combine three parts
+	//FragColor = vec4(a * (1.0f - Fresnel) + b * Fresnel + SpecularTerm, 1.0f);
 	
-	//FragColor = vec4(vec3(clamp(0.0, 1.0, 1.0 - Fresnel)), 1.0);
-	//FragColor = vec4((Normal + vec3(1.0)) / 2.0, 1.0);
-	//FragColor = vec4((normalized_viewDir + vec3(1.0)) / 2.0, 1.0);
-	//FragColor = vec4(Normal, 1.0);
-	//FragColor = vec4(normalized_viewDir, 1.0);
+	FragColor = vec4((Normal + vec3(1.0f)) / 2.0, 1.0);
+	//FragColor = vec4((WorldSpace + vec3(1.0)) / 2.0, 1.0);
+
+	//FragColor = vec4(vec3(texture(DepthTexture, TexCoord).r), 1.0);
+	//FragColor = texture(ThicknessTexture, TexCoord);
+	//FragColor = texture(Depth_BilateralFilter, TexCoord);
+	//FragColor = texture(Thickness_GaussianBlur, TexCoord);
+	//FragColor = texture(NormalTexture, TexCoord);
 }

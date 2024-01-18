@@ -11,6 +11,9 @@
 glm::vec3 MyPos = glm::vec3(0.0f, halflen * 3.0f, halflen * 8.0f);
 Camera camera = Camera(MyPos, glm::vec3(0.0f) - MyPos);
 
+std::vector<float> primitives;
+std::vector<unsigned int> indices;
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
 }
@@ -26,6 +29,58 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
 void WindowCheck(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
+	}
+}
+
+void GenerateSphere() {
+
+	for (int y = 0; y <= Y_SEGMENTS; y++)
+	{
+		for (int x = 0; x <= X_SEGMENTS; x++)
+		{
+			float xSegment = (float)x / (float)X_SEGMENTS * 2.0f;
+			float ySegment = (float)y / (float)Y_SEGMENTS;
+
+			float yPos = std::cos(ySegment * Pi);
+			float nowradius = sqrt(1.0f - yPos * yPos);
+
+			float xPos = nowradius * std::cos(xSegment * Pi);
+			float zPos = nowradius * std::sin(xSegment * Pi);
+
+
+			primitives.push_back(xPos);
+			primitives.push_back(yPos);
+			primitives.push_back(zPos);
+		}
+	}
+
+
+	for (int j = 0; j < X_SEGMENTS; j++) {
+		indices.push_back(j);
+		indices.push_back(j + X_SEGMENTS + 1);
+		indices.push_back(j + X_SEGMENTS + 2);
+	}
+
+	for (int j = tot_vertices_number - 1 - X_SEGMENTS; j < tot_vertices_number - 1; j++) {
+		indices.push_back(j);
+		indices.push_back(j - X_SEGMENTS - 1);
+		indices.push_back(j - X_SEGMENTS);
+	}
+
+	for (int i = 0; i < Y_SEGMENTS - 2; i++) {
+		for (int j = 0; j < X_SEGMENTS; j++) {
+
+			int now_begin_num = (i + 1) * (X_SEGMENTS + 1);
+			int next_begin_num = (i + 2) * (X_SEGMENTS + 1);
+
+			indices.push_back(now_begin_num + j);
+			indices.push_back(next_begin_num + j);
+			indices.push_back(next_begin_num + j + 1);
+
+			indices.push_back(now_begin_num + j);
+			indices.push_back(next_begin_num + j + 1);
+			indices.push_back(now_begin_num + j + 1);
+		}
 	}
 }
 
@@ -58,25 +113,7 @@ int main() {
 	glfwSetScrollCallback(window, scroll_callback);
 
 	//Primitives & Indices & Vertices
-	float primitives[] = {
-		0.0f, radius, 0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, radius, 0.0f, 0.0f, 1.0f,
-		radius, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, -radius, 0.0f, 0.0f, -1.0f,
-		-radius, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-		0.0f, -radius, 0.0f, 0.0f, -1.0f, 0.0f
-	};
-
-	unsigned int indices[] = {
-		0, 1, 2,
-		0, 2, 3,
-		0, 3, 4,
-		0, 4, 1,
-		5, 2, 1,
-		5, 3, 2,
-		5, 4, 3,
-		5, 1, 4
-	};
+	GenerateSphere();
 
 	float nowx = -halflen, nowy = -halflen, nowz = -halflen;
 	for (int i = 0; i < NUM; i++) {
@@ -98,14 +135,12 @@ int main() {
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(primitives), primitives, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * primitives.size(), &primitives[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indices.size(), &indices[0], GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
 
@@ -118,7 +153,7 @@ int main() {
 		WindowCheck(window);
 
 		//Position_Based_Fluids Simulation
-		PositionBasedFluids();
+		//PositionBasedFluids();
 
 		//Screen_Space_Fluids Rendering
 		ScreenSpaceFluids(window, camera, VAO);
