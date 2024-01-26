@@ -12,8 +12,17 @@ uniform vec3 CameraPos;
 
 uniform mat4 VP;
 
+float eps = 1e-6;
+
+// Step size function is necessary
 float WidthStep = 1.0 / Width;
 float HeightStep = 1.0 / Height;
+
+float getStepSize(float depth) {
+	// Calculate Step size according to depth
+	float maxStep = 4.0f, minStep = 1.5f;
+	return minStep + max(eps, 1.0f - depth) * (maxStep - minStep);
+}
 
 vec3 getWorldSpace(float x, float y, float z) {
 	// Necessities: Depth_BilateralFilter, VP
@@ -30,6 +39,10 @@ void main() {
 		FragColor = vec4(0.0, 0.0, 0.0, 1.0);
 		discard;
 	}
+
+	float baseStepSize = getStepSize(depth);
+	WidthStep *= baseStepSize;
+	HeightStep *= baseStepSize;
 
 	float x = gl_FragCoord.x / Width;
 	float y = gl_FragCoord.y / Height;

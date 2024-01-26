@@ -85,19 +85,18 @@ void main() {
 	// Specular
 	vec3 SpecularTerm = vec3(0.0f);
 	vec3 lightDir, halfDir;
-	float dotProduct;
 	for(int i = 0; i < 5; i++) {
 		lightDir = normalize(light[i].Position - WorldSpace);
-		halfDir = normalize(lightDir + viewDir);
-		if(dot(lightDir, viewDir) < eps)
+		halfDir = normalize(lightDir + normalized_viewDir);
+		if(dot(lightDir, Normal) < eps)
 			continue;
 		SpecularTerm += Ks * pow(dot(Normal, halfDir), alpha) * light[i].Intensity;
 	}
 
 	//Combine three parts
-	//FragColor = vec4(a * (1.0f - Fresnel) + b * Fresnel + SpecularTerm, 1.0f);
+	FragColor = vec4(a * (1.0f - Fresnel) + b * Fresnel, 1.0f); // Remove Specular Term
 	
-	FragColor = vec4((Normal + vec3(1.0f)) / 2.0, 1.0);
+	//FragColor = vec4(Normal, 1.0f);
 	//FragColor = vec4((WorldSpace + vec3(1.0)) / 2.0, 1.0);
 
 	//FragColor = vec4(vec3(texture(DepthTexture, TexCoord).r), 1.0);

@@ -22,7 +22,7 @@ public:
 	float Speed = SPEED;
 	float Sensitivity = SENSITIVITY;
 	float nearPlane = 0.1f;
-	float farPlane = 10.0f;
+	float farPlane = 5.0f;
 
 	Camera(glm::vec3 position = glm::vec3(0.0f), glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f));
 

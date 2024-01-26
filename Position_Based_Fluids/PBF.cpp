@@ -181,6 +181,7 @@ static void Find_Virtual_Particle() {
 		}
 		*/
 
+		
 		check_boundary = -Bound - (predictPos[id].y - Kernel_h);//-Y
 		if (check_boundary > eps) {
 			for (float ny = -Bound - distance; ny > -Bound - check_boundary; ny -= 2.0f * distance) {
@@ -346,7 +347,7 @@ void PositionBasedFluids() {
 			KDTree::neighboring.pop();
 		}
 	}
-	
+
 
 	//Step 3: Position Update Iteration
 	for (int NowIter = 1; NowIter <= MaxIteration; NowIter++) {
@@ -371,7 +372,7 @@ void PositionBasedFluids() {
 				delta_p[i] += (lambda[i] /*/ V[i]*/ + lambda[neighbors[i][j]] /*/ V[neighbors[i][j]]*/ + s_corr)
 					* Spiky_gradient(predictPos[i] - predictPos[neighbors[i][j]], Kernel_h);
 			}
-			
+
 			for (int j = 0; j < additional_neighbors[i].size(); j++) {
 				float s_corr = -Tensile_k_for_wall * (float)pow(Poly6_density(predictPos[i] - additional_neighbors[i][j], Kernel_h) / Poly6_density(glm::vec3(1.0f, 0.0f, 0.0f) * 0.2f * Kernel_h, Kernel_h), 4);
 				delta_p[i] += (lambda[i] + s_corr) * Spiky_gradient(predictPos[i] - additional_neighbors[i][j], Kernel_h);
